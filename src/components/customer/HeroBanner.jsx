@@ -2,13 +2,9 @@ export default function HeroBanner({ firstName }) {
   return (
     <div className="bg-brand-red text-white">
       <div className="max-w-2xl mx-auto px-4 py-10 text-center">
-        {/* House logo */}
+        {/* State Farm logo */}
         <div className="flex justify-center mb-4">
-          <div className="bg-white/15 rounded-full p-3">
-            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-            </svg>
-          </div>
+          <img src="/statefarm-logo.png" alt="State Farm" className="h-10 brightness-0 invert" />
         </div>
 
         <p className="text-red-200 text-sm font-medium uppercase tracking-wider mb-1">

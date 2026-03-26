@@ -2,12 +2,12 @@ export default function AgentContactCard() {
   return (
     <div className="max-w-2xl mx-auto bg-gray-50 border border-gray-200 rounded-xl p-5">
       <div className="flex items-center gap-4">
-        {/* Photo placeholder */}
-        <div className="w-16 h-16 rounded-full bg-brand-red/10 border-2 border-brand-red/20 flex items-center justify-center shrink-0">
-          <svg className="w-8 h-8 text-brand-red/60" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-          </svg>
-        </div>
+        {/* Agent photo */}
+        <img
+          src="/david-padilla.jpg"
+          alt="David Padilla"
+          className="w-16 h-16 rounded-full object-cover object-top shrink-0 border-2 border-brand-red/20"
+        />
 
         <div className="flex-1 min-w-0">
           <p className="font-bold text-gray-900">David Padilla</p>
