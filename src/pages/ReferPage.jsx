@@ -30,6 +30,7 @@ const DEMO_GIFT_CARDS = [
 export default function ReferPage() {
   const [searchParams] = useSearchParams()
   const slug = searchParams.get('c')
+  const staffIdParam = searchParams.get('s')
   const isDemo = slug === 'demo'
 
   const { customer: realCustomer, loading: custLoading } = useCustomer(isDemo ? null : slug)
@@ -102,7 +103,7 @@ export default function ReferPage() {
         <TierBreakdownGrid currentTierName={loading ? null : tier.name} />
 
         {!loading && customer && (
-          <ReferralForm customer={customer} quotedCount={quotedCount} />
+          <ReferralForm customer={customer} quotedCount={quotedCount} staffId={staffIdParam} />
         )}
 
         <AgentContactCard />

@@ -10,7 +10,7 @@ import Card from '../ui/Card'
 
 const INSURANCE_OPTIONS = ['Auto', 'Home', 'Life']
 
-export default function ReferralForm({ customer, quotedCount }) {
+export default function ReferralForm({ customer, quotedCount, staffId }) {
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', phone: '', email: '' })
   const [interests, setInterests] = useState([])
@@ -41,9 +41,6 @@ export default function ReferralForm({ customer, quotedCount }) {
     setErrors({})
 
     try {
-      // Get next staff via round-robin Postgres function
-      const { data: staffId } = await supabase.rpc('get_next_staff')
-
       const { error } = await supabase.from('referrals').insert({
         customer_id: customer.id,
         referred_name: form.name.trim(),

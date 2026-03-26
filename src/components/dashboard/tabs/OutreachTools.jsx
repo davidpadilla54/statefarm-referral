@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Card from '../../ui/Card'
 import Button from '../../ui/Button'
 import { useToast } from '../../ui/ToastProvider'
+import { supabase } from '../../../lib/supabase'
 
 function toSlug(name) {
   return name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -9,18 +10,27 @@ function toSlug(name) {
 
 export default function OutreachTools() {
   const [name, setName] = useState('')
+  const [staffList, setStaffList] = useState([])
+  const [selectedStaffId, setSelectedStaffId] = useState('')
   const toast = useToast()
   const siteUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin
 
-  const slug = toSlug(name)
-  const referralLink = slug ? `${siteUrl}/refer?c=${slug}` : ''
+  useEffect(() => {
+    supabase.from('staff').select('id, name').eq('active', true).order('name')
+      .then(({ data }) => { if (data) setStaffList(data) })
+  }, [])
 
-  const smsTemplate = slug
+  const slug = toSlug(name)
+  const referralLink = slug && selectedStaffId
+    ? `${siteUrl}/refer?c=${slug}&s=${selectedStaffId}`
+    : ''
+
+  const smsTemplate = referralLink
     ? `Hi [Friend's Name]! I've been working with David Padilla at State Farm and they're great. I just referred you for a free quote — check it out: ${referralLink} 🏠`
     : ''
 
   const emailSubject = name ? `${name} referred you for a free insurance quote!` : ''
-  const emailBody = slug
+  const emailBody = referralLink
     ? `Hi there,\n\nYour friend ${name} referred you to David Padilla's State Farm agency for a free insurance quote.\n\nClick the link below to learn more and share your info:\n${referralLink}\n\nQuestions? Call David directly at 904-398-0401.\n\nBest,\nDavid Padilla\nState Farm Agent\n904-398-0401 | www.davidinsuresflorida.com`
     : ''
 
@@ -33,6 +43,19 @@ export default function OutreachTools() {
       <h2 className="text-xl font-bold text-gray-900">Outreach Tools</h2>
 
       <Card>
+        {/* Staff selector */}
+        <label className="text-sm font-medium text-gray-700 block mb-2">Your Name</label>
+        <select
+          value={selectedStaffId}
+          onChange={e => setSelectedStaffId(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-4"
+        >
+          <option value="">Select your name…</option>
+          {staffList.map(s => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
         <label className="text-sm font-medium text-gray-700 block mb-2">Customer Name</label>
         <input
           value={name}
@@ -48,7 +71,7 @@ export default function OutreachTools() {
             <input
               readOnly
               value={referralLink}
-              placeholder="Enter customer name above…"
+              placeholder="Select your name and enter customer name…"
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-600"
             />
             <Button size="sm" disabled={!referralLink} onClick={() => copy(referralLink, 'Link')}>
@@ -65,7 +88,7 @@ export default function OutreachTools() {
               readOnly
               value={smsTemplate}
               rows={3}
-              placeholder="Enter customer name above…"
+              placeholder="Select your name and enter customer name…"
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-600 resize-none"
             />
             <Button
@@ -98,7 +121,7 @@ export default function OutreachTools() {
               readOnly
               value={emailBody}
               rows={7}
-              placeholder="Enter customer name above…"
+              placeholder="Select your name and enter customer name…"
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-600 resize-none font-mono"
             />
             <Button
