@@ -1,19 +1,23 @@
 export default function AgentContactCard() {
   return (
-    <div className="max-w-2xl mx-auto bg-gray-50 border border-gray-200 rounded-xl p-5">
-      <div className="flex items-center gap-4">
-        {/* Agent photo */}
-        <img
-          src="/david-padilla.jpg"
-          alt="David Padilla"
-          className="w-16 h-16 rounded-full object-cover object-top shrink-0 border-2 border-brand-red/20"
-        />
+    <div className="max-w-2xl mx-auto bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+      <div className="flex">
+        {/* Vertical photo */}
+        <div className="w-36 shrink-0">
+          <img
+            src="/david-padilla.jpg"
+            alt="David Padilla"
+            className="w-full h-full object-cover object-top"
+            style={{ minHeight: '180px' }}
+          />
+        </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-gray-900">David Padilla</p>
-          <p className="text-sm text-brand-red font-medium">State Farm Insurance Agent</p>
+        {/* Info */}
+        <div className="flex-1 min-w-0 p-5 flex flex-col justify-center">
+          <p className="font-bold text-gray-900 text-lg">David Padilla</p>
+          <p className="text-sm text-brand-red font-medium mb-3">State Farm Insurance Agent</p>
 
-          <div className="mt-2 space-y-1">
+          <div className="space-y-1.5">
             <a
               href="tel:9043980401"
               className="flex items-center gap-2 text-sm text-gray-600 hover:text-brand-red transition-colors"

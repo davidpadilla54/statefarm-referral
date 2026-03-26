@@ -4,7 +4,7 @@ export default function HeroBanner({ firstName }) {
       <div className="max-w-2xl mx-auto px-4 py-10 text-center">
         {/* State Farm logo */}
         <div className="flex justify-center mb-4">
-          <img src="/statefarm-logo.png" alt="State Farm" className="h-10 brightness-0 invert" />
+          <img src="/statefarm-logo.png" alt="State Farm" className="h-16 brightness-0 invert" />
         </div>
 
         <p className="text-red-200 text-sm font-medium uppercase tracking-wider mb-1">
