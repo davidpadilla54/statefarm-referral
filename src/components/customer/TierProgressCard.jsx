@@ -4,7 +4,7 @@ import Badge from '../ui/Badge'
 import Skeleton from '../ui/Skeleton'
 import { getTierForCount, getNextTier, tierProgress, referralsUntilNextTier, totalEarned } from '../../lib/tiers'
 
-export default function TierProgressCard({ customer, referrals, giftCards, loading }) {
+export default function TierProgressCard({ customer, referrals, giftCards, loading, tr }) {
   if (loading) {
     return (
       <Card className="max-w-2xl mx-auto">
@@ -28,14 +28,14 @@ export default function TierProgressCard({ customer, referrals, giftCards, loadi
     <Card className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Current Tier</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">{tr.currentTier}</p>
           <div className="flex items-center gap-2">
             <Badge label={tier.name} type="tier" className="text-sm px-3 py-1" />
-            <span className="text-gray-700 font-semibold">${tier.amount} / referral</span>
+            <span className="text-gray-700 font-semibold">${tier.amount} {tr.perReferral}</span>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Total Earned</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">{tr.totalEarned}</p>
           <p className="text-2xl font-bold text-gray-900">${earned.toFixed(0)}</p>
         </div>
       </div>
@@ -46,23 +46,17 @@ export default function TierProgressCard({ customer, referrals, giftCards, loadi
             <ProgressBar percent={progress} />
           </div>
           <p className="text-sm text-gray-500">
-            <span className="font-semibold text-gray-700">{untilNext} more quote{untilNext !== 1 ? 's' : ''}</span> to reach{' '}
-            <Badge label={nextTier.name} type="tier" /> (${nextTier.amount}/referral)
+            <span className="font-semibold text-gray-700">{tr.quotesToNext(untilNext)}</span>{' '}
+            <Badge label={nextTier.name} type="tier" /> (${nextTier.amount}{tr.perReferral})
           </p>
         </>
       ) : (
-        <p className="text-sm text-purple-700 font-semibold">
-          You've reached Platinum — the highest tier! You earn $30 per referral forever.
-        </p>
+        <p className="text-sm text-purple-700 font-semibold">{tr.platinumMsg}</p>
       )}
 
       <div className="mt-4 pt-4 border-t border-gray-100 flex gap-6 text-sm text-gray-600">
-        <div>
-          <span className="font-bold text-gray-900">{referrals.length}</span> submitted
-        </div>
-        <div>
-          <span className="font-bold text-gray-900">{quotedCount}</span> quoted
-        </div>
+        <div><span className="font-bold text-gray-900">{referrals.length}</span> {tr.submitted}</div>
+        <div><span className="font-bold text-gray-900">{quotedCount}</span> {tr.quoted}</div>
       </div>
     </Card>
   )

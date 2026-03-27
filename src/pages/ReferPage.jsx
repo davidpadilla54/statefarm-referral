@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import { useCustomer } from '../hooks/useCustomer'
 import { useReferrals } from '../hooks/useReferrals'
+import { useLang } from '../hooks/useLang'
 import HeroBanner from '../components/customer/HeroBanner'
 import TierProgressCard from '../components/customer/TierProgressCard'
 import ReferralHistoryTable from '../components/customer/ReferralHistoryTable'
@@ -32,6 +33,7 @@ export default function ReferPage() {
   const slug = searchParams.get('c')
   const staffIdParam = searchParams.get('s')
   const isDemo = slug === 'demo'
+  const { lang, toggleLang, tr } = useLang()
 
   const { customer: realCustomer, loading: custLoading } = useCustomer(isDemo ? null : slug)
   const { referrals: realReferrals, loading: refLoading } = useReferrals(isDemo ? null : realCustomer?.id)
@@ -51,7 +53,6 @@ export default function ReferPage() {
   const gcData    = isDemo ? DEMO_GIFT_CARDS : giftCards
   const loading   = isDemo ? false : (custLoading || refLoading)
 
-  const firstName   = customer?.name?.split(' ')[0]
   const quotedCount = referrals.filter(r => r.status === 'Quoted' || r.status === 'Won').length
   const tier        = getTierForCount(quotedCount)
 
@@ -60,9 +61,9 @@ export default function ReferPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center text-center px-4">
         <div>
           <div className="text-5xl mb-4">🔗</div>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">Invalid referral link</h1>
-          <p className="text-gray-500">Please use the personalized link your agent sent you.</p>
-          <p className="text-sm text-gray-400 mt-4">Questions? Call <a href="tel:9043980401" className="text-brand-red font-medium">904-398-0401</a></p>
+          <h1 className="text-xl font-bold text-gray-800 mb-2">{tr.invalidLinkTitle}</h1>
+          <p className="text-gray-500">{tr.invalidLinkMsg}</p>
+          <p className="text-sm text-gray-400 mt-4">{tr.questionsCallShort} <a href="tel:9043980401" className="text-brand-red font-medium">904-398-0401</a></p>
         </div>
       </div>
     )
@@ -73,9 +74,9 @@ export default function ReferPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center text-center px-4">
         <div>
           <div className="text-5xl mb-4">🤔</div>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">Customer not found</h1>
-          <p className="text-gray-500">We couldn't find your account. Please contact David directly.</p>
-          <p className="text-sm text-gray-400 mt-4">Call <a href="tel:9043980401" className="text-brand-red font-medium">904-398-0401</a></p>
+          <h1 className="text-xl font-bold text-gray-800 mb-2">{tr.notFoundTitle}</h1>
+          <p className="text-gray-500">{tr.notFoundMsg}</p>
+          <p className="text-sm text-gray-400 mt-4">{tr.questionsCallShort} <a href="tel:9043980401" className="text-brand-red font-medium">904-398-0401</a></p>
         </div>
       </div>
     )
@@ -83,7 +84,11 @@ export default function ReferPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeroBanner fullName={loading ? null : customer?.name} />
+      <HeroBanner
+        fullName={loading ? null : customer?.name}
+        onToggleLang={toggleLang}
+        lang={lang}
+      />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <TierProgressCard
@@ -91,22 +96,30 @@ export default function ReferPage() {
           referrals={referrals}
           giftCards={gcData}
           loading={loading}
+          tr={tr}
         />
 
         <ReferralHistoryTable
           referrals={referrals}
           giftCards={gcData}
           loading={loading}
+          tr={tr}
         />
 
-        <HowItWorks />
-        <TierBreakdownGrid currentTierName={loading ? null : tier.name} />
+        <HowItWorks tr={tr} />
+        <TierBreakdownGrid currentTierName={loading ? null : tier.name} tr={tr} />
 
         {!loading && customer && (
-          <ReferralForm customer={customer} quotedCount={quotedCount} staffId={staffIdParam} />
+          <ReferralForm
+            customer={customer}
+            quotedCount={quotedCount}
+            staffId={staffIdParam}
+            tr={tr}
+            lang={lang}
+          />
         )}
 
-        <AgentContactCard />
+        <AgentContactCard tr={tr} />
 
         <p className="text-center text-xs text-gray-400 pb-4">
           David Padilla — State Farm Agency · 904-398-0401

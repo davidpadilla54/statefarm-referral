@@ -8,7 +8,7 @@ import Input from '../ui/Input'
 import Toggle from '../ui/Toggle'
 import Card from '../ui/Card'
 
-const INSURANCE_OPTIONS = ['Auto', 'Home', 'Life', 'Health', 'Business']
+const INTEREST_KEYS = ['Auto', 'Home', 'Life', 'Health', 'Business']
 
 function launchConfetti() {
   const canvas = document.createElement('canvas')
@@ -62,7 +62,7 @@ function launchConfetti() {
   animate()
 }
 
-export default function ReferralForm({ customer, quotedCount, staffId }) {
+export default function ReferralForm({ customer, quotedCount, staffId, tr, lang }) {
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', phone: '', email: '' })
   const [interests, setInterests] = useState([])
@@ -71,17 +71,11 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
 
   function validate() {
     const e = {}
-    if (!form.name.trim()) e.name = 'Name is required'
-    if (!form.phone.trim()) e.phone = 'Phone number is required'
-    if (!form.email.trim()) e.email = 'Email address is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email'
+    if (!form.name.trim()) e.name = tr.errName
+    if (!form.phone.trim()) e.phone = tr.errPhone
+    if (!form.email.trim()) e.email = tr.errEmail
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = tr.errEmailInvalid
     return e
-  }
-
-  function toggleInterest(interest) {
-    setInterests(prev =>
-      prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
-    )
   }
 
   async function handleSubmit(e) {
@@ -107,7 +101,6 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
 
       const tier = getTierForCount(quotedCount)
 
-      // Fire email alert (non-blocking)
       sendEmail('new_referral', {
         referredBy: customer.name,
         referredName: form.name.trim(),
@@ -119,29 +112,29 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
       }).catch(console.error)
 
       launchConfetti()
-      navigate('/thank-you', { state: { firstName: customer.name.split(' ')[0] } })
+      navigate('/thank-you', { state: { firstName: customer.name.split(' ')[0], slug: customer.slug, lang } })
     } catch (err) {
       console.error(err)
-      setErrors({ submit: 'Something went wrong. Please try again.' })
+      setErrors({ submit: tr.errSubmit })
       setSubmitting(false)
     }
   }
 
   return (
     <Card className="max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold text-gray-900 mb-1">Refer a Friend</h2>
-      <p className="text-sm text-gray-500 mb-5">Fill in their details and we'll take it from there.</p>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">{tr.referFriend}</h2>
+      <p className="text-sm text-gray-500 mb-5">{tr.referFriendSub}</p>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <Input
-          label="Friend's Full Name *"
+          label={tr.friendName}
           placeholder="Jane Smith"
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
           error={errors.name}
         />
         <Input
-          label="Friend's Phone Number *"
+          label={tr.friendPhone}
           type="tel"
           placeholder="(904) 555-0100"
           value={form.phone}
@@ -149,7 +142,7 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
           error={errors.phone}
         />
         <Input
-          label="Friend's Email Address *"
+          label={tr.friendEmail}
           type="email"
           placeholder="jane@example.com"
           value={form.email}
@@ -159,15 +152,17 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
 
         <div>
           <label className="text-sm font-medium text-gray-700 block mb-2">
-            Insurance Interest <span className="text-gray-400 font-normal">(optional)</span>
+            {tr.insuranceInterest} <span className="text-gray-400 font-normal">{tr.insuranceOptional}</span>
           </label>
           <div className="flex gap-2 flex-wrap">
-            {INSURANCE_OPTIONS.map(opt => (
+            {INTEREST_KEYS.map((key, i) => (
               <Toggle
-                key={opt}
-                label={opt}
-                active={interests.includes(opt)}
-                onClick={() => toggleInterest(opt)}
+                key={key}
+                label={tr.insuranceOptions[i]}
+                active={interests.includes(key)}
+                onClick={() => setInterests(prev =>
+                  prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+                )}
               />
             ))}
           </div>
@@ -179,13 +174,8 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
           </p>
         )}
 
-        <Button
-          type="submit"
-          size="lg"
-          disabled={submitting}
-          className="w-full mt-2"
-        >
-          {submitting ? 'Submitting…' : 'Submit Referral'}
+        <Button type="submit" size="lg" disabled={submitting} className="w-full mt-2">
+          {submitting ? tr.submittingBtn : tr.submitBtn}
         </Button>
       </form>
     </Card>
