@@ -83,7 +83,7 @@ export default function ReferPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <HeroBanner firstName={loading ? null : firstName} />
+      <HeroBanner fullName={loading ? null : customer?.name} />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <TierProgressCard

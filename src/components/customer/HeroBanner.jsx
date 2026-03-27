@@ -1,4 +1,4 @@
-export default function HeroBanner({ firstName }) {
+export default function HeroBanner({ fullName }) {
   return (
     <div className="bg-brand-red text-white">
       <div className="max-w-2xl mx-auto px-4 py-10 text-center">
@@ -12,7 +12,7 @@ export default function HeroBanner({ firstName }) {
         </p>
 
         <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-          {firstName ? `Hi ${firstName}! 👋` : 'Referral Rewards'}
+          {fullName ? `Hi ${fullName}! 👋` : 'Referral Rewards'}
         </h1>
 
         <p className="text-red-100 text-base sm:text-lg max-w-md mx-auto leading-relaxed">

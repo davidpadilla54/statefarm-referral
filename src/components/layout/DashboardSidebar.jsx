@@ -1,17 +1,20 @@
 import { useAuth } from '../../hooks/useAuth'
+import { useStaffRole } from '../../hooks/useStaffRole'
 
-const TABS = [
-  { id: 'customers',   label: 'Customers',         icon: '👤' },
+const ALL_TABS = [
+  { id: 'customers',   label: 'Customers',         icon: '👤', agentOnly: true },
   { id: 'referrals',   label: 'Referral Tracker',  icon: '📋' },
   { id: 'leaderboard', label: 'Leaderboard',        icon: '🏆' },
-  { id: 'giftcards',   label: 'Gift Cards',          icon: '🎁' },
-  { id: 'staff',       label: 'Staff Performance',  icon: '👥' },
+  { id: 'giftcards',   label: 'Gift Cards',          icon: '🎁', agentOnly: true },
+  { id: 'staff',       label: 'Staff Performance',  icon: '👥', agentOnly: true },
   { id: 'outreach',    label: 'Outreach Tools',     icon: '📣' },
-  { id: 'alerts',      label: 'Alert Settings',     icon: '🔔' },
+  { id: 'alerts',      label: 'Alert Settings',     icon: '🔔', agentOnly: true },
 ]
 
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {
   const { signOut, user } = useAuth()
+  const { role } = useStaffRole()
+  const tabs = ALL_TABS.filter(t => !t.agentOnly || role === 'agent')
 
   const nav = (
     <nav className="flex flex-col h-full">
@@ -28,7 +31,7 @@ export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, o
 
       {/* Tabs */}
       <div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {TABS.map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => { onTabChange(tab.id); onMobileClose?.() }}

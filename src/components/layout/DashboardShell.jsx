@@ -5,7 +5,7 @@ export default function DashboardShell({ activeTab, onTabChange, children }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <DashboardSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}
@@ -29,7 +29,7 @@ export default function DashboardShell({ activeTab, onTabChange, children }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3 sm:p-4 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

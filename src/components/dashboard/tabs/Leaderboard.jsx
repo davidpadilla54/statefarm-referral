@@ -1,11 +1,14 @@
 import { useLeaderboard } from '../../../hooks/useLeaderboard'
+import { useSortable } from '../../../hooks/useSortable'
 import Badge from '../../ui/Badge'
 import Skeleton from '../../ui/Skeleton'
+import SortableHeader from '../../ui/SortableHeader'
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
 export default function Leaderboard() {
   const { rows, loading } = useLeaderboard()
+  const { sorted, sortKey, sortDir, handleSort } = useSortable(rows, 'earned', 'desc')
 
   return (
     <div className="space-y-4">
@@ -25,13 +28,16 @@ export default function Leaderboard() {
           <table className="w-full min-w-[540px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                {['Rank', 'Customer', 'Tier', 'Submitted', 'Quoted', 'Total Earned'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rank</th>
+                <SortableHeader label="Customer"     colKey="name"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"         colKey="tier"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Submitted"    colKey="submitted" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Quoted"       colKey="quoted"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Total Earned" colKey="earned"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {rows.map((row, i) => (
+              {sorted.map((row, i) => (
                 <tr key={row.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-lg text-center">
                     {i < 3 ? MEDALS[i] : <span className="text-sm text-gray-500 font-medium">#{i + 1}</span>}

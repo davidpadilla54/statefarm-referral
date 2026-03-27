@@ -8,7 +8,59 @@ import Input from '../ui/Input'
 import Toggle from '../ui/Toggle'
 import Card from '../ui/Card'
 
-const INSURANCE_OPTIONS = ['Auto', 'Home', 'Life']
+const INSURANCE_OPTIONS = ['Auto', 'Home', 'Life', 'Health', 'Business']
+
+function launchConfetti() {
+  const canvas = document.createElement('canvas')
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999'
+  document.body.appendChild(canvas)
+  const ctx = canvas.getContext('2d')
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+
+  const colors = ['#CC0000', '#FFD700', '#ffffff', '#28a745', '#17a2b8', '#fd7e14']
+  const pieces = Array.from({ length: 100 }, () => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * canvas.height * 0.3,
+    w: 7 + Math.random() * 7,
+    h: 4 + Math.random() * 4,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    speed: 2.5 + Math.random() * 3.5,
+    angle: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.15,
+    drift: (Math.random() - 0.5) * 1.5,
+    opacity: 1,
+  }))
+
+  let frame
+  let tick = 0
+  function animate() {
+    tick++
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    let done = true
+    pieces.forEach(p => {
+      p.y += p.speed
+      p.x += p.drift
+      p.angle += p.spin
+      if (tick > 80) p.opacity = Math.max(0, p.opacity - 0.02)
+      if (p.y < canvas.height + 20) done = false
+      ctx.save()
+      ctx.globalAlpha = p.opacity
+      ctx.translate(p.x, p.y)
+      ctx.rotate(p.angle)
+      ctx.fillStyle = p.color
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+      ctx.restore()
+    })
+    if (!done && tick < 160) {
+      frame = requestAnimationFrame(animate)
+    } else {
+      cancelAnimationFrame(frame)
+      canvas.remove()
+    }
+  }
+  animate()
+}
 
 export default function ReferralForm({ customer, quotedCount, staffId }) {
   const navigate = useNavigate()
@@ -66,6 +118,7 @@ export default function ReferralForm({ customer, quotedCount, staffId }) {
         tierAmount: tier.amount,
       }).catch(console.error)
 
+      launchConfetti()
       navigate('/thank-you', { state: { firstName: customer.name.split(' ')[0] } })
     } catch (err) {
       console.error(err)

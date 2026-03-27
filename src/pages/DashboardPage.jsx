@@ -1,6 +1,7 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import DashboardShell from '../components/layout/DashboardShell'
 import Skeleton from '../components/ui/Skeleton'
+import { useStaffRole } from '../hooks/useStaffRole'
 
 const Customers       = lazy(() => import('../components/dashboard/tabs/Customers'))
 const ReferralTracker = lazy(() => import('../components/dashboard/tabs/ReferralTracker'))
@@ -9,6 +10,8 @@ const GiftCards       = lazy(() => import('../components/dashboard/tabs/GiftCard
 const StaffPerformance = lazy(() => import('../components/dashboard/tabs/StaffPerformance'))
 const OutreachTools   = lazy(() => import('../components/dashboard/tabs/OutreachTools'))
 const AlertSettings   = lazy(() => import('../components/dashboard/tabs/AlertSettings'))
+
+const AGENT_ONLY_TABS = new Set(['customers', 'giftcards', 'staff', 'alerts'])
 
 const TAB_COMPONENTS = {
   customers:    <Customers />,
@@ -28,12 +31,28 @@ const TabFallback = () => (
 )
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState('customers')
+  const { role, loading } = useStaffRole()
+  const [activeTab, setActiveTab] = useState(null)
+
+  useEffect(() => {
+    if (!loading && activeTab === null) {
+      setActiveTab(role === 'agent' ? 'customers' : 'outreach')
+    }
+  }, [role, loading])
+
+  function handleTabChange(tab) {
+    if (AGENT_ONLY_TABS.has(tab) && role !== 'agent') return
+    setActiveTab(tab)
+  }
+
+  if (loading || !activeTab) return <TabFallback />
+
+  const allowed = !AGENT_ONLY_TABS.has(activeTab) || role === 'agent'
 
   return (
-    <DashboardShell activeTab={activeTab} onTabChange={setActiveTab}>
+    <DashboardShell activeTab={activeTab} onTabChange={handleTabChange}>
       <Suspense fallback={<TabFallback />}>
-        {TAB_COMPONENTS[activeTab]}
+        {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['outreach']}
       </Suspense>
     </DashboardShell>
   )

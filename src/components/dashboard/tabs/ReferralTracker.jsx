@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useDashboardReferrals } from '../../../hooks/useDashboardReferrals'
+import { useSortable } from '../../../hooks/useSortable'
 import ReferralRow from '../ReferralRow'
 import Skeleton from '../../ui/Skeleton'
+import SortableHeader from '../../ui/SortableHeader'
 
 const STATUS_FILTER_OPTIONS = ['All', 'New', 'Contacted', 'Quoted', 'Won', 'Lost']
 
@@ -18,6 +20,16 @@ export default function ReferralTracker() {
     const matchStatus = statusFilter === 'All' || r.status === statusFilter
     return matchSearch && matchStatus
   })
+
+  // Flatten nested fields for sorting
+  const flatForSort = filtered.map(r => ({
+    ...r,
+    _customer_name: r.customers?.name ?? '',
+    _assigned_name: r.staff?.name ?? '',
+    _date: r.submitted_at ?? '',
+  }))
+
+  const { sorted, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_date', 'desc')
 
   return (
     <div className="space-y-4">
@@ -55,13 +67,18 @@ export default function ReferralTracker() {
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                {['Referral Name', 'Phone', 'Email', 'Referred By', 'Assigned To', 'Tier', 'Date', 'Status'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
+                <SortableHeader label="Referral Name" colKey="referred_name"  activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Phone"         colKey="referred_phone" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Email"         colKey="referred_email" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Referred By"   colKey="_customer_name" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Assigned To"   colKey="_assigned_name" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"          colKey="tier"           activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Date"          colKey="_date"          activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Status"        colKey="status"         activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(r => (
+              {sorted.map(r => (
                 <ReferralRow
                   key={r.id}
                   referral={r}

@@ -1,20 +1,41 @@
 import { useGiftCards } from '../../../hooks/useGiftCards'
+import { useSortable } from '../../../hooks/useSortable'
 import Badge from '../../ui/Badge'
 import Button from '../../ui/Button'
 import Skeleton from '../../ui/Skeleton'
+import SortableHeader from '../../ui/SortableHeader'
 import { useToast } from '../../ui/ToastProvider'
+import { sendEmail } from '../../../lib/resend'
 
 export default function GiftCards() {
   const { giftCards, loading, markSent } = useGiftCards()
   const toast = useToast()
 
   async function handleMarkSent(id) {
+    const gc = giftCards.find(g => g.id === id)
     await markSent(id)
     toast('Gift card marked as sent!', 'success')
+    if (gc?.customers?.email) {
+      sendEmail('gift_card_sent', {
+        customerName: gc.customers.name ?? 'there',
+        customerEmail: gc.customers.email,
+        referredName: gc.referrals?.referred_name ?? 'your referral',
+        amount: Number(gc.amount).toFixed(0),
+        tier: gc.tier,
+      }).catch(console.error)
+    }
   }
 
   const pending = giftCards.filter(g => g.status === 'Pending')
   const sent = giftCards.filter(g => g.status === 'Sent')
+
+  const flatForSort = giftCards.map(gc => ({
+    ...gc,
+    _customer: gc.customers?.name ?? '',
+    _referral: gc.referrals?.referred_name ?? '',
+    _date: gc.earned_at ?? '',
+  }))
+  const { sorted: sortedGC, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_date', 'desc')
 
   return (
     <div className="space-y-4">
@@ -45,13 +66,17 @@ export default function GiftCards() {
           <table className="w-full min-w-[640px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                {['Customer', 'Referral', 'Tier', 'Amount', 'Date Earned', 'Status', 'Action'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
+                <SortableHeader label="Customer"    colKey="_customer" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Referral"    colKey="_referral" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"        colKey="tier"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Amount"      colKey="amount"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Date Earned" colKey="_date"     activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Status"      colKey="status"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {giftCards.map(gc => (
+              {sortedGC.map(gc => (
                 <tr key={gc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{gc.customers?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{gc.referrals?.referred_name ?? '—'}</td>

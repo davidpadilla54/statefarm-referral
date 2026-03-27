@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useCustomers } from '../../../hooks/useCustomers'
+import { useSortable } from '../../../hooks/useSortable'
 import Badge from '../../ui/Badge'
 import Button from '../../ui/Button'
 import Card from '../../ui/Card'
 import Input from '../../ui/Input'
 import Skeleton from '../../ui/Skeleton'
+import SortableHeader from '../../ui/SortableHeader'
 import { useToast } from '../../ui/ToastProvider'
 
 const siteUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin
@@ -167,6 +169,12 @@ export default function Customers() {
     c.slug.includes(search.toLowerCase())
   )
 
+  const flatForSort = filtered.map(c => ({
+    ...c,
+    _joined: c.created_at ?? '',
+  }))
+  const { sorted: sortedCustomers, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_joined', 'desc')
+
   function copyLink(slug) {
     navigator.clipboard.writeText(referralLink(slug))
       .then(() => toast('Referral link copied!', 'success'))
@@ -211,13 +219,16 @@ export default function Customers() {
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                {['Name', 'Contact', 'Tier', 'Referral Link', 'Joined', 'Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
+                <SortableHeader label="Name"         colKey="name"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Contact"      colKey="email"   activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"         colKey="tier"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Referral Link</th>
+                <SortableHeader label="Joined"       colKey="_joined" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map(c => (
+              {sortedCustomers.map(c => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     <p className="text-sm font-semibold text-gray-900">{c.name}</p>

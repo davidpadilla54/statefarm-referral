@@ -17,8 +17,7 @@ export default function ProtectedRoute({ children }) {
     )
   }
 
-  if (!session && import.meta.env.VITE_DEMO !== 'true') return <Navigate to="/login" replace />
-  if (!session) { /* demo mode — skip auth */ }
+  if (!session) return <Navigate to="/login" replace />
 
   return children
 }
