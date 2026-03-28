@@ -6,6 +6,7 @@ export default function ThankYouPage() {
   const { state } = useLocation()
   const firstName = state?.firstName ?? 'there'
   const slug = state?.slug
+  const count = state?.count ?? 1
   const lang = state?.lang ?? localStorage.getItem('dp_lang') ?? 'en'
   const tr = t[lang] ?? t.en
 
@@ -24,7 +25,9 @@ export default function ThankYouPage() {
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
           <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{tr.referralReceived}</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            {count > 1 ? `${count} Referrals Received!` : tr.referralReceived}
+          </h2>
           <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
             {tr.referralReceivedMsg}
           </p>

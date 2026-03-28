@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCustomers } from '../../../hooks/useCustomers'
 import { useSortable } from '../../../hooks/useSortable'
+import Avatar from '../../ui/Avatar'
 import Badge from '../../ui/Badge'
 import Button from '../../ui/Button'
 import Card from '../../ui/Card'
@@ -231,8 +232,13 @@ export default function Customers() {
               {sortedCustomers.map(c => (
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="text-sm font-semibold text-gray-900">{c.name}</p>
-                    <p className="text-xs text-gray-400 font-mono">{c.slug}</p>
+                    <div className="flex items-center gap-2.5">
+                      <Avatar name={c.name} size="sm" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{c.name}</p>
+                        <p className="text-xs text-gray-400 font-mono">{c.slug}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <p className="text-sm text-gray-600">{c.phone || '—'}</p>

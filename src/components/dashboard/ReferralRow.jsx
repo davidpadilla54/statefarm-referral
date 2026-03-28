@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase'
 import { sendEmail } from '../../lib/resend'
 import { getTierForCount } from '../../lib/tiers'
+import Avatar from '../ui/Avatar'
 import Badge from '../ui/Badge'
 import { useToast } from '../ui/ToastProvider'
 
@@ -73,7 +74,12 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
 
   return (
     <tr className={rowClass}>
-      <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{referral.referred_name}</td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <Avatar name={referral.referred_name} size="sm" />
+          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{referral.referred_name}</span>
+        </div>
+      </td>
       <td className="px-4 py-3 text-sm text-gray-500">{referral.referred_phone}</td>
       <td className="px-4 py-3 text-sm text-gray-500 truncate max-w-[160px]">{referral.referred_email}</td>
       <td className="px-4 py-3 text-sm text-gray-700">{referral.customers?.name ?? '—'}</td>

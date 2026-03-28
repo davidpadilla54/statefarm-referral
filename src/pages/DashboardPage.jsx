@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import DashboardShell from '../components/layout/DashboardShell'
+import DashboardHero from '../components/dashboard/DashboardHero'
 import Skeleton from '../components/ui/Skeleton'
 import { useStaffRole } from '../hooks/useStaffRole'
 
@@ -51,6 +52,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell activeTab={activeTab} onTabChange={handleTabChange}>
+      {role === 'agent' && <DashboardHero onNavigate={handleTabChange} />}
       <Suspense fallback={<TabFallback />}>
         {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['outreach']}
       </Suspense>

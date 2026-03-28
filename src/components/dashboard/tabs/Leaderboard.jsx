@@ -1,5 +1,6 @@
 import { useLeaderboard } from '../../../hooks/useLeaderboard'
 import { useSortable } from '../../../hooks/useSortable'
+import Avatar from '../../ui/Avatar'
 import Badge from '../../ui/Badge'
 import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
@@ -42,7 +43,12 @@ export default function Leaderboard() {
                   <td className="px-4 py-3 text-lg text-center">
                     {i < 3 ? MEDALS[i] : <span className="text-sm text-gray-500 font-medium">#{i + 1}</span>}
                   </td>
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-900">{row.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <Avatar name={row.name} size="sm" />
+                      <span className="text-sm font-semibold text-gray-900">{row.name}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3"><Badge label={row.tier} type="tier" /></td>
                   <td className="px-4 py-3 text-sm text-gray-600">{row.submitted}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{row.quoted}</td>
