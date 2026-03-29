@@ -15,9 +15,10 @@ const TIER_STYLES = {
   Platinum: 'bg-purple-100 text-purple-700 border border-purple-300',
 }
 
-export default function Badge({ label, type = 'status', className = '' }) {
+export default function Badge({ label, tierKey, type = 'status', className = '' }) {
   const styles = type === 'tier' ? TIER_STYLES : STATUS_STYLES
-  const style = styles[label] ?? 'bg-gray-100 text-gray-700'
+  // tierKey lets us look up the right style even when label is translated
+  const style = styles[tierKey ?? label] ?? 'bg-gray-100 text-gray-700'
   return (
     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${style} ${className}`}>
       {label}

@@ -34,7 +34,7 @@ export default function TierProgressCard({ customer, referrals, giftCards, loadi
           <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1.5">{tr.currentTier}</p>
           <div className="flex items-center gap-2">
             <span className="text-2xl">{icon}</span>
-            <Badge label={tier.name} type="tier" className="text-sm px-3 py-1" />
+            <Badge label={tr.tierNames[tier.name]} tierKey={tier.name} type="tier" className="text-sm px-3 py-1" />
             <span className="text-gray-600 text-sm font-medium">${tier.amount} {tr.perReferral}</span>
           </div>
         </div>
@@ -58,8 +58,7 @@ export default function TierProgressCard({ customer, referrals, giftCards, loadi
           </div>
           <p className="text-sm text-gray-500 mt-2">
             <span className="font-semibold text-gray-700">{tr.quotesToNext(untilNext)}</span>{' '}
-            <span className="text-gray-400">to reach</span>{' '}
-            <span className="font-semibold">{TIER_ICONS[nextTier.name]} {nextTier.name}</span>{' '}
+            <span className="font-semibold">{TIER_ICONS[nextTier.name]} {tr.tierNames[nextTier.name]}</span>{' '}
             <span className="text-gray-400">(${nextTier.amount}{tr.perReferral})</span>
           </p>
         </>

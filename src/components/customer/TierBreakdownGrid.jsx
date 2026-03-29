@@ -1,6 +1,8 @@
 import { TIERS } from '../../lib/tiers'
 import Badge from '../ui/Badge'
 
+
+
 const TIER_CONFIG = {
   Bronze:   { icon: '🥉', gradient: 'from-amber-50 to-orange-50',   accent: '#CD7F32', ring: 'ring-amber-300'   },
   Silver:   { icon: '🥈', gradient: 'from-slate-50 to-gray-100',    accent: '#A8A9AD', ring: 'ring-slate-300'   },
@@ -9,6 +11,7 @@ const TIER_CONFIG = {
 }
 
 export default function TierBreakdownGrid({ currentTierName, tr }) {
+  const tierNames = tr.tierNames ?? { Bronze: 'Bronze', Silver: 'Silver', Gold: 'Gold', Platinum: 'Platinum' }
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-xl font-bold text-gray-900 text-center mb-6">{tr.rewardTiers}</h2>
@@ -34,7 +37,7 @@ export default function TierBreakdownGrid({ currentTierName, tr }) {
               {/* Tier icon */}
               <div className="text-2xl mt-1 mb-1">{cfg.icon}</div>
 
-              <Badge label={tier.name} type="tier" className="mb-1" />
+              <Badge label={tierNames[tier.name]} tierKey={tier.name} type="tier" className="mb-1" />
               <p className={`text-2xl font-bold mt-2 ${tier.color}`}>${tier.amount}</p>
               <p className="text-xs text-gray-400 mt-0.5">{tr.perReferralShort}</p>
               <p className="text-xs text-gray-500 mt-2">{tr.tierRanges[i]}</p>
