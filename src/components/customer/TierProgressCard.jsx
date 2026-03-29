@@ -1,8 +1,9 @@
 import Card from '../ui/Card'
-import ProgressBar from '../ui/ProgressBar'
 import Badge from '../ui/Badge'
 import Skeleton from '../ui/Skeleton'
 import { getTierForCount, getNextTier, tierProgress, referralsUntilNextTier, totalEarned } from '../../lib/tiers'
+
+const TIER_ICONS = { Bronze: '🥉', Silver: '🥈', Gold: '🥇', Platinum: '💎' }
 
 export default function TierProgressCard({ customer, referrals, giftCards, loading, tr }) {
   if (loading) {
@@ -23,40 +24,62 @@ export default function TierProgressCard({ customer, referrals, giftCards, loadi
   const progress = tierProgress(quotedCount)
   const untilNext = referralsUntilNextTier(quotedCount)
   const earned = totalEarned(giftCards ?? [])
+  const icon = TIER_ICONS[tier.name] ?? '🎁'
 
   return (
     <Card className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
+      {/* Top row: tier + earned */}
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">{tr.currentTier}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1.5">{tr.currentTier}</p>
           <div className="flex items-center gap-2">
+            <span className="text-2xl">{icon}</span>
             <Badge label={tier.name} type="tier" className="text-sm px-3 py-1" />
-            <span className="text-gray-700 font-semibold">${tier.amount} {tr.perReferral}</span>
+            <span className="text-gray-600 text-sm font-medium">${tier.amount} {tr.perReferral}</span>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">{tr.totalEarned}</p>
-          <p className="text-2xl font-bold text-gray-900">${earned.toFixed(0)}</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">{tr.totalEarned}</p>
+          <p className="text-3xl font-bold text-gray-900">${earned.toFixed(0)}</p>
         </div>
       </div>
 
+      {/* Progress bar */}
       {nextTier ? (
         <>
-          <div className="mb-2">
-            <ProgressBar percent={progress} />
+          <div className="mb-1">
+            {/* Track */}
+            <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-brand-red to-red-400 rounded-full transition-all duration-500"
+                style={{ width: `${Math.max(progress, 4)}%` }}
+              />
+            </div>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mt-2">
             <span className="font-semibold text-gray-700">{tr.quotesToNext(untilNext)}</span>{' '}
-            <Badge label={nextTier.name} type="tier" /> (${nextTier.amount}{tr.perReferral})
+            <span className="text-gray-400">to reach</span>{' '}
+            <span className="font-semibold">{TIER_ICONS[nextTier.name]} {nextTier.name}</span>{' '}
+            <span className="text-gray-400">(${nextTier.amount}{tr.perReferral})</span>
           </p>
         </>
       ) : (
-        <p className="text-sm text-purple-700 font-semibold">{tr.platinumMsg}</p>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">💎</span>
+          <p className="text-sm text-purple-700 font-semibold">{tr.platinumMsg}</p>
+        </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-gray-100 flex gap-6 text-sm text-gray-600">
-        <div><span className="font-bold text-gray-900">{referrals.length}</span> {tr.submitted}</div>
-        <div><span className="font-bold text-gray-900">{quotedCount}</span> {tr.quoted}</div>
+      {/* Stats footer */}
+      <div className="mt-5 pt-4 border-t border-gray-100 flex gap-6 text-sm text-gray-600">
+        <div>
+          <span className="font-bold text-xl text-gray-900">{referrals.length}</span>
+          <span className="ml-1.5">{tr.submitted}</span>
+        </div>
+        <div>
+          <span className="font-bold text-xl text-gray-900">{quotedCount}</span>
+          <span className="ml-1.5">{tr.quoted}</span>
+        </div>
       </div>
     </Card>
   )

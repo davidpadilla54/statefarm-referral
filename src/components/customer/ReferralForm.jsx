@@ -292,6 +292,10 @@ export default function ReferralForm({ customer, quotedCount, staffId, tr, lang 
         <Button type="submit" size="lg" disabled={submitting} className="w-full mt-2">
           {submitLabel}
         </Button>
+
+        <p className="text-xs text-gray-400 text-center pt-1">
+          Gift cards are awarded only when a referred contact is reachable and completes a quote with our office.
+        </p>
       </form>
     </Card>
   )

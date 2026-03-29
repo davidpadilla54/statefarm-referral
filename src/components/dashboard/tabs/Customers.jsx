@@ -32,11 +32,11 @@ function SmsModal({ customer, onClose }) {
   const defaultScript =
 `Hey ${customerFirstName}! It's ${staffFirstName} from David Padilla – State Farm 🏠
 
-You're part of our Referral Rewards Program! Share your personal link with friends or family who need insurance — and earn a gift card when they get a quote:
+You're enrolled in our Referral Rewards Program! 🎁 Know anyone who could use auto, home, or life insurance? Use your personal link to enter their info and earn a gift card when they get a quote:
 
 ${fullLink}
 
-Questions? Just reply! 😊`
+It only takes a minute — and there's no limit to how many you can refer! Questions? Just reply! 😊`
 
   const [message, setMessage] = useState(defaultScript)
   const toast = useToast()
