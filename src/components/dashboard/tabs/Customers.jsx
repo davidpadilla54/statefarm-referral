@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useCustomers } from '../../../hooks/useCustomers'
+import { useStaffRole } from '../../../hooks/useStaffRole'
 import { useSortable } from '../../../hooks/useSortable'
 import Avatar from '../../ui/Avatar'
 import Badge from '../../ui/Badge'
@@ -10,7 +11,7 @@ import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
 import { useToast } from '../../ui/ToastProvider'
 
-const siteUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin
+const siteUrl = import.meta.env.VITE_PROD_URL ?? import.meta.env.VITE_SITE_URL ?? window.location.origin
 
 function referralLink(slug) {
   return `${siteUrl}/refer?c=${slug}`
@@ -20,7 +21,112 @@ function toSlug(name) {
   return name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 }
 
-// ── Add Customer Modal ─────────────────────────────────────────────────────────
+// ── SMS Composer Modal ──────────────────────────────────────────────────────
+function SmsModal({ customer, onClose }) {
+  const fullLink = referralLink(customer.slug)
+  const staffFirstName = customer.created_by
+    ? customer.created_by.split(' ')[0]
+    : 'the team'
+  const customerFirstName = customer.name.split(' ')[0]
+
+  const defaultScript =
+`Hey ${customerFirstName}! It's ${staffFirstName} from David Padilla – State Farm 🏠
+
+You're part of our Referral Rewards Program! Share your personal link with friends or family who need insurance — and earn a gift card when they get a quote:
+
+${fullLink}
+
+Questions? Just reply! 😊`
+
+  const [message, setMessage] = useState(defaultScript)
+  const toast = useToast()
+
+  const phone = (customer.phone ?? '').replace(/\D/g, '')
+  const smsHref = phone
+    ? `sms:+1${phone}?body=${encodeURIComponent(message)}`
+    : `sms:?body=${encodeURIComponent(message)}`
+
+  function copyMessage() {
+    navigator.clipboard.writeText(message)
+      .then(() => toast('Message copied!', 'success'))
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg">
+        <Card>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-brand-red flex items-center justify-center text-white text-sm font-bold shrink-0">
+                📱
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Send Referral Link</h2>
+                <p className="text-xs text-gray-400">{customer.name}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          </div>
+
+          {/* Phone */}
+          <div className="mb-3">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">To</label>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-mono">
+              {customer.phone || <span className="text-gray-400 italic">No phone on file</span>}
+            </div>
+          </div>
+
+          {/* Referral link preview */}
+          <div className="mb-3">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Referral Link</label>
+            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+              <span className="text-xs text-brand-red font-mono truncate flex-1">{fullLink}</span>
+            </div>
+          </div>
+
+          {/* Message */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Message</label>
+              <span className="text-xs text-gray-400">Editable before sending</span>
+            </div>
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              rows={8}
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-red resize-none text-gray-700 leading-relaxed"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            <button
+              onClick={copyMessage}
+              className="flex-1 px-4 py-2.5 text-sm font-semibold border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Copy Message
+            </button>
+            <a
+              href={smsHref}
+              className="flex-1 px-4 py-2.5 text-sm font-bold bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors text-center"
+              onClick={onClose}
+            >
+              📱 Open in Messages
+            </a>
+          </div>
+
+          <p className="text-xs text-gray-400 text-center mt-2">
+            Opens your native SMS app with this message pre-filled
+          </p>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// ── Add Customer Modal ──────────────────────────────────────────────────────
 function AddCustomerModal({ onClose, onAdd }) {
   const [form, setForm] = useState({ name: '', phone: '', email: '' })
   const [errors, setErrors] = useState({})
@@ -111,7 +217,7 @@ function AddCustomerModal({ onClose, onAdd }) {
   )
 }
 
-// ── Edit Customer Modal ────────────────────────────────────────────────────────
+// ── Edit Customer Modal ─────────────────────────────────────────────────────
 function EditCustomerModal({ customer, onClose, onSave }) {
   const [form, setForm] = useState({ name: customer.name, phone: customer.phone ?? '', email: customer.email ?? '' })
   const [saving, setSaving] = useState(false)
@@ -156,11 +262,13 @@ function EditCustomerModal({ customer, onClose, onSave }) {
   )
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────────
+// ── Main Component ──────────────────────────────────────────────────────────
 export default function Customers() {
   const { customers, loading, addCustomer, updateCustomer } = useCustomers()
+  const { name: staffName } = useStaffRole()
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [smsCustomer, setSmsCustomer] = useState(null)
   const [search, setSearch] = useState('')
   const toast = useToast()
 
@@ -179,6 +287,11 @@ export default function Customers() {
   function copyLink(slug) {
     navigator.clipboard.writeText(referralLink(slug))
       .then(() => toast('Referral link copied!', 'success'))
+  }
+
+  // Wrap addCustomer to inject the logged-in staff member's name
+  async function handleAddCustomer(form) {
+    return addCustomer({ ...form, createdBy: staffName || null })
   }
 
   return (
@@ -217,14 +330,15 @@ export default function Customers() {
             )}
           </div>
         ) : (
-          <table className="w-full min-w-[700px]">
+          <table className="w-full min-w-[760px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                <SortableHeader label="Name"         colKey="name"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Contact"      colKey="email"   activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Tier"         colKey="tier"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Name"    colKey="name"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Contact" colKey="email"   activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"    colKey="tier"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Added By</th>
                 <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Referral Link</th>
-                <SortableHeader label="Joined"       colKey="_joined" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Joined"  colKey="_joined" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -248,8 +362,18 @@ export default function Customers() {
                     <Badge label={c.tier ?? 'Bronze'} type="tier" />
                   </td>
                   <td className="px-4 py-3">
+                    {c.created_by ? (
+                      <div className="flex items-center gap-1.5">
+                        <Avatar name={c.created_by} size="xs" />
+                        <span className="text-xs text-gray-600">{c.created_by.split(' ')[0]}</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500 font-mono truncate max-w-[160px]">
+                      <span className="text-xs text-gray-500 font-mono truncate max-w-[140px]">
                         /refer?c={c.slug}
                       </span>
                       <button
@@ -264,12 +388,20 @@ export default function Customers() {
                     {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => setEditing(c)}
-                      className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSmsCustomer(c)}
+                        className="text-xs font-semibold px-2.5 py-1.5 bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors whitespace-nowrap"
+                      >
+                        📱 Send Link
+                      </button>
+                      <button
+                        onClick={() => setEditing(c)}
+                        className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -284,7 +416,7 @@ export default function Customers() {
       {showAdd && (
         <AddCustomerModal
           onClose={() => setShowAdd(false)}
-          onAdd={addCustomer}
+          onAdd={handleAddCustomer}
         />
       )}
       {editing && (
@@ -292,6 +424,12 @@ export default function Customers() {
           customer={editing}
           onClose={() => setEditing(null)}
           onSave={updateCustomer}
+        />
+      )}
+      {smsCustomer && (
+        <SmsModal
+          customer={smsCustomer}
+          onClose={() => setSmsCustomer(null)}
         />
       )}
     </div>

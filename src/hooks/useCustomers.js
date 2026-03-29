@@ -16,9 +16,15 @@ export function useCustomers() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  async function addCustomer({ name, phone, email }) {
+  async function addCustomer({ name, phone, email, createdBy }) {
     const slug = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    const { error } = await supabase.from('customers').insert({ name: name.trim(), slug, phone: phone.trim(), email: email.trim() })
+    const { error } = await supabase.from('customers').insert({
+      name: name.trim(),
+      slug,
+      phone: phone.trim(),
+      email: email.trim(),
+      created_by: createdBy ?? null,
+    })
     if (error) throw error
     await fetch()
     return slug

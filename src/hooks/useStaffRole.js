@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 export function useStaffRole() {
   const { user, loading: authLoading } = useAuth()
   const [role, setRole] = useState(null)
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -13,14 +14,15 @@ export function useStaffRole() {
 
     supabase
       .from('staff')
-      .select('role')
+      .select('role, name')
       .eq('email', user.email)
       .single()
       .then(({ data }) => {
         setRole(data?.role ?? 'staff')
+        setName(data?.name ?? '')
         setLoading(false)
       })
   }, [user, authLoading])
 
-  return { role, loading }
+  return { role, name, loading }
 }
