@@ -81,7 +81,7 @@ export const t = {
     // HeroBanner
     agencyLine: 'David Padilla — State Farm',
     heroTitle: (name) => name ? `¡Hola ${name}! 👋` : 'Programa de Referencias',
-    heroSubtitle: '¡Refiere a amigos y familiares para obtener cotizaciones de seguro y gana tarjetas de regalo por cada cotización completada!',
+    heroSubtitle: '¡Refiere a amigos y familiares para cotizar su seguro y gana una tarjeta de regalo por cada una completada!',
 
     // TierProgressCard
     currentTier: 'Nivel Actual',
