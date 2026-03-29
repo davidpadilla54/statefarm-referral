@@ -1,6 +1,6 @@
-import { UserPlus, FileSearch, Gift } from 'lucide-react'
+import { UserPlus, Phone, Gift } from 'lucide-react'
 
-const STEP_ICONS = [UserPlus, FileSearch, Gift]
+const STEP_ICONS = [UserPlus, Phone, Gift]
 
 export default function HowItWorks({ tr }) {
   return (

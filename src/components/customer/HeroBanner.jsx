@@ -22,10 +22,17 @@ export default function HeroBanner({ fullName, onToggleLang, lang }) {
       {/* Language toggle */}
       <button
         onClick={onToggleLang}
-        className="absolute top-4 right-4 flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors z-10"
         aria-label="Toggle language"
+        className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-white/20 hover:bg-white/30 transition-colors rounded-full p-1 pr-2"
       >
-        🌐 {lang === 'en' ? 'Español' : 'English'}
+        {/* EN pill */}
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${lang === 'en' ? 'bg-white text-brand-red' : 'text-white'}`}>
+          EN
+        </span>
+        {/* ES pill */}
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${lang === 'es' ? 'bg-white text-brand-red' : 'text-white'}`}>
+          ES
+        </span>
       </button>
 
       {/* Content */}
