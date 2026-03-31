@@ -133,6 +133,7 @@ export default function ReferralForm({ customer, quotedCount, staffId, staffEmai
   const navigate = useNavigate()
   const [persons, setPersons] = useState([emptyPerson()])
   const [interests, setInterests] = useState([])
+  const [gcPreference, setGcPreference] = useState(null)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -188,6 +189,7 @@ export default function ReferralForm({ customer, quotedCount, staffId, staffEmai
           insurance_interest: interests,
           assigned_to: staffId ?? null,
           status: 'New',
+          gift_card_preference: gcPreference ?? null,
         }))
 
       const { error } = await supabase.from('referrals').insert(toInsert)
@@ -198,15 +200,16 @@ export default function ReferralForm({ customer, quotedCount, staffId, staffEmai
       // Send confirmation to customer + notify agent/staff
       toInsert.forEach(ref => {
         sendEmail('new_referral', {
-          referredBy:       customer.name,
-          referredName:     ref.referred_name,
-          referredPhone:    ref.referred_phone,
-          referredEmail:    ref.referred_email ?? '',
-          insuranceInterest: interests,
-          currentTier:      tier.name,
-          tierAmount:       tier.amount,
-          customerEmail:    customer.email ?? null,
-          staffEmail:       staffEmail ?? null,
+          referredBy:          customer.name,
+          referredName:        ref.referred_name,
+          referredPhone:       ref.referred_phone,
+          referredEmail:       ref.referred_email ?? '',
+          insuranceInterest:   interests,
+          currentTier:         tier.name,
+          tierAmount:          tier.amount,
+          customerEmail:       customer.email ?? null,
+          staffEmail:          staffEmail ?? null,
+          giftCardPreference:  gcPreference ?? null,
         }).catch(console.error)
       })
 
@@ -282,6 +285,39 @@ export default function ReferralForm({ customer, quotedCount, staffId, staffEmai
                 )}
               />
             ))}
+          </div>
+        </div>
+
+        {/* Gift card preference picker */}
+        <div className="pt-1">
+          <label className="text-sm font-medium text-gray-700 block mb-1">
+            {tr.giftCardChoice}
+          </label>
+          <p className="text-xs text-gray-400 mb-2">{tr.giftCardChoiceSub}</p>
+          <div className="grid grid-cols-5 gap-2">
+            {(tr.giftCardOptions ?? ['Amazon', 'Starbucks', 'Target', 'Walmart', "Lowe's"]).map((opt) => {
+              const active = gcPreference === opt
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setGcPreference(active ? null : opt)}
+                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border-2 text-xs font-semibold transition-all
+                    ${active
+                      ? 'border-brand-red bg-red-50 text-brand-red shadow-sm'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                    }`}
+                >
+                  <span className="text-xl leading-none">
+                    {opt === 'Amazon'    ? '📦' :
+                     opt === 'Starbucks' ? '☕' :
+                     opt === 'Target'    ? '🎯' :
+                     opt === 'Walmart'   ? '🛒' : '🔨'}
+                  </span>
+                  {opt}
+                </button>
+              )
+            })}
           </div>
         </div>
 

@@ -9,7 +9,7 @@ import Tooltip from '../../ui/Tooltip'
 import { useToast } from '../../ui/ToastProvider'
 import { sendEmail } from '../../../lib/resend'
 
-const DAVID_EMAIL = 'david.padilla.vaf43r@statefarm.com'
+const DAVID_EMAIL = 'davidpadilla54@gmail.com'
 
 export default function GiftCards() {
   const { giftCards, loading, markSent } = useGiftCards()
@@ -38,9 +38,10 @@ export default function GiftCards() {
 
   const flatForSort = giftCards.map(gc => ({
     ...gc,
-    _customer: gc.customers?.name ?? '',
-    _referral: gc.referrals?.referred_name ?? '',
-    _date:     gc.earned_at ?? '',
+    _customer:   gc.customers?.name ?? '',
+    _referral:   gc.referrals?.referred_name ?? '',
+    _preference: gc.referrals?.gift_card_preference ?? '',
+    _date:       gc.earned_at ?? '',
   }))
   const { sorted: sortedGC, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_date', 'desc')
 
@@ -82,12 +83,13 @@ export default function GiftCards() {
           <table className="w-full min-w-[640px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                <SortableHeader label="Customer"    colKey="_customer" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Referral"    colKey="_referral" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Tier"        colKey="tier"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Amount"      colKey="amount"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Date Earned" colKey="_date"     activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Status"      colKey="status"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Customer"    colKey="_customer"   activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Referral"    colKey="_referral"   activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Gift Card"   colKey="_preference" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"        colKey="tier"        activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Amount"      colKey="amount"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Date Earned" colKey="_date"       activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Status"      colKey="status"      activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 {isAdmin && <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>}
               </tr>
             </thead>
@@ -96,6 +98,20 @@ export default function GiftCards() {
                 <tr key={gc.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{gc.customers?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-sm text-gray-600">{gc.referrals?.referred_name ?? '—'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {gc.referrals?.gift_card_preference
+                      ? <span className="inline-flex items-center gap-1">
+                          <span>
+                            {gc.referrals.gift_card_preference === 'Amazon'    ? '📦' :
+                             gc.referrals.gift_card_preference === 'Starbucks' ? '☕' :
+                             gc.referrals.gift_card_preference === 'Target'    ? '🎯' :
+                             gc.referrals.gift_card_preference === 'Walmart'   ? '🛒' : '🔨'}
+                          </span>
+                          {gc.referrals.gift_card_preference}
+                        </span>
+                      : <span className="text-gray-400">—</span>
+                    }
+                  </td>
                   <td className="px-4 py-3"><Badge label={gc.tier} type="tier" /></td>
                   <td className="px-4 py-3 text-sm font-bold text-green-700">${Number(gc.amount).toFixed(0)}</td>
                   <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">

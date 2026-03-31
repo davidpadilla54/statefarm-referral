@@ -1,7 +1,15 @@
-export function newReferralHtml({ referredBy, referredName, referredPhone, referredEmail, insuranceInterest, currentTier, tierAmount }) {
+export function newReferralHtml({ referredBy, referredName, referredPhone, referredEmail, insuranceInterest, currentTier, tierAmount, giftCardPreference }) {
   const interests = Array.isArray(insuranceInterest) && insuranceInterest.length
     ? insuranceInterest.join(', ')
     : 'Not specified'
+
+  const gcEmoji = giftCardPreference === 'Amazon'    ? '📦' :
+                  giftCardPreference === 'Starbucks' ? '☕' :
+                  giftCardPreference === 'Target'    ? '🎯' :
+                  giftCardPreference === 'Walmart'   ? '🛒' :
+                  giftCardPreference === "Lowe's"    ? '🔨' : null
+
+  const gcDisplay = giftCardPreference ? `${gcEmoji} ${giftCardPreference}` : 'No preference'
 
   return `<!DOCTYPE html>
 <html>
@@ -24,6 +32,7 @@ export function newReferralHtml({ referredBy, referredName, referredPhone, refer
             ${row('Phone', referredPhone)}
             ${row('Email', referredEmail)}
             ${row('Insurance Interest', interests)}
+            ${row('Gift Card Preference', gcDisplay, !!giftCardPreference)}
             ${row('Current Tier', `${currentTier} — $${tierAmount}/referral`, true)}
           </table>
           <p style="color:#6b7280;font-size:13px;margin:0;">This referral has been auto-assigned to a staff member for follow-up.</p>

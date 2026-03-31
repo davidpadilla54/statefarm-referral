@@ -58,6 +58,9 @@ export const t = {
     errEmailInvalid: 'Enter a valid email',
     errSubmit: 'Something went wrong. Please try again.',
     giftCardDisclaimer: 'Gift cards are awarded only when a referred contact is reachable and completes a quote with our office.',
+    giftCardChoice: 'Gift Card Preference',
+    giftCardChoiceSub: 'Which gift card would you like if your referral is quoted?',
+    giftCardOptions: ['Amazon', 'Starbucks', 'Target', 'Walmart', "Lowe's"],
 
     // AgentContactCard
     agentTitle: 'State Farm Insurance Agent',
@@ -137,6 +140,9 @@ export const t = {
     errEmailInvalid: 'Ingresa un correo válido',
     errSubmit: 'Algo salió mal. Por favor intenta de nuevo.',
     giftCardDisclaimer: 'Las tarjetas de regalo se otorgan únicamente cuando el contacto referido es localizable y completa una cotización en nuestra oficina.',
+    giftCardChoice: 'Preferencia de Tarjeta de Regalo',
+    giftCardChoiceSub: '¿Qué tarjeta de regalo te gustaría si se cotiza tu referido?',
+    giftCardOptions: ['Amazon', 'Starbucks', 'Target', 'Walmart', "Lowe's"],
 
     // AgentContactCard
     agentTitle: 'Agente de Seguros State Farm',

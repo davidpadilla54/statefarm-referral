@@ -8,7 +8,7 @@ export function useGiftCards() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('gift_cards')
-      .select(`*, customers(name, email), referrals(referred_name)`)
+      .select(`*, customers(name, email), referrals(referred_name, gift_card_preference)`)
       .order('earned_at', { ascending: false })
     setGiftCards(data ?? [])
     setLoading(false)
