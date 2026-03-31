@@ -15,7 +15,7 @@ export default function GiftCards() {
   const { giftCards, loading, markSent } = useGiftCards()
   const { role } = useStaffRole()
   const toast = useToast()
-  const isAdmin = role === 'admin'
+  const isAdmin = role === 'agent'
 
   async function handleMarkSent(id) {
     const gc = giftCards.find(g => g.id === id)
