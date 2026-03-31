@@ -41,9 +41,19 @@ export default function ReferralHistoryTable({ referrals, giftCards, loading, tr
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isQuoted ? (
-                    <span className="text-sm font-semibold text-green-600">
-                      {gc ? `$${Number(gc.amount).toFixed(0)} ${tr.earned}` : (tr.quoted.charAt(0).toUpperCase() + tr.quoted.slice(1))}
+                  {isQuoted && gc ? (
+                    gc.status === 'Sent' ? (
+                      <span className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                        ✓ ${Number(gc.amount).toFixed(0)} {tr.earned}
+                      </span>
+                    ) : (
+                      <span className="text-sm font-semibold text-blue-600">
+                        🎁 ${Number(gc.amount).toFixed(0)} {tr.earned}
+                      </span>
+                    )
+                  ) : isQuoted ? (
+                    <span className="text-sm font-semibold text-gray-600">
+                      {tr.quoted.charAt(0).toUpperCase() + tr.quoted.slice(1)}
                     </span>
                   ) : (
                     <Badge label={tr.pendingQuote} />

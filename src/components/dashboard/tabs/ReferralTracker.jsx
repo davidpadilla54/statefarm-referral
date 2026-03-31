@@ -4,6 +4,7 @@ import { useSortable } from '../../../hooks/useSortable'
 import ReferralRow from '../ReferralRow'
 import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
+import Tooltip from '../../ui/Tooltip'
 
 const STATUS_FILTER_OPTIONS = ['All', 'New', 'Contacted', 'Quoted', 'Won', 'Lost']
 
@@ -21,12 +22,11 @@ export default function ReferralTracker() {
     return matchSearch && matchStatus
   })
 
-  // Flatten nested fields for sorting
   const flatForSort = filtered.map(r => ({
     ...r,
     _customer_name: r.customers?.name ?? '',
-    _assigned_name: r.staff?.name ?? '',
-    _date: r.submitted_at ?? '',
+    _sent_by:       r.customers?.created_by ?? '',
+    _date:          r.submitted_at ?? '',
   }))
 
   const { sorted, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_date', 'desc')
@@ -34,7 +34,10 @@ export default function ReferralTracker() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Referral Tracker</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-xl font-bold text-gray-900">Referral Tracker</h2>
+          <Tooltip text="All referrals submitted by customers. 'Sent By' shows which staff member invited that customer. Status can be updated inline." position="right" />
+        </div>
         <div className="flex gap-2 flex-wrap">
           <input
             type="search"
@@ -64,17 +67,17 @@ export default function ReferralTracker() {
             <p className="font-medium">{search || statusFilter !== 'All' ? 'No matching referrals' : 'No referrals yet'}</p>
           </div>
         ) : (
-          <table className="w-full min-w-[800px]">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                <SortableHeader label="Referral Name" colKey="referred_name"  activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Phone"         colKey="referred_phone" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Email"         colKey="referred_email" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Referred By"   colKey="_customer_name" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Assigned To"   colKey="_assigned_name" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Tier"          colKey="tier"           activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Date"          colKey="_date"          activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortableHeader label="Status"        colKey="status"         activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Referral Name"  colKey="referred_name"  activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Phone"          colKey="referred_phone" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Email"          colKey="referred_email" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Referred By"    colKey="_customer_name" activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Sent By"        colKey="_sent_by"       activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Tier"           colKey="tier"           activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Date"           colKey="_date"          activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortableHeader label="Status"         colKey="status"         activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

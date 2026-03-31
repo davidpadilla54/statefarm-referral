@@ -19,20 +19,20 @@ export default function HeroBanner({ fullName, onToggleLang, lang }) {
         }}
       />
 
-      {/* Language toggle */}
+      {/* Language toggle — sliding pill */}
       <button
         onClick={onToggleLang}
         aria-label="Toggle language"
-        className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-white/20 hover:bg-white/30 transition-colors rounded-full p-1 pr-2"
+        className="absolute top-4 right-4 z-10"
       >
-        {/* EN pill */}
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${lang === 'en' ? 'bg-white text-brand-red' : 'text-white'}`}>
-          EN
-        </span>
-        {/* ES pill */}
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${lang === 'es' ? 'bg-white text-brand-red' : 'text-white'}`}>
-          ES
-        </span>
+        <div className="relative flex items-center bg-white/20 rounded-full p-0.5 w-[72px] h-8">
+          {/* Sliding pill */}
+          <span
+            className={`absolute top-0.5 h-7 w-8 bg-white rounded-full shadow transition-transform duration-200 ${lang === 'es' ? 'translate-x-[36px]' : 'translate-x-0.5'}`}
+          />
+          <span className={`relative z-10 w-8 text-center text-xs font-bold transition-colors duration-200 ${lang === 'en' ? 'text-brand-red' : 'text-white'}`}>EN</span>
+          <span className={`relative z-10 w-8 text-center text-xs font-bold transition-colors duration-200 ${lang === 'es' ? 'text-brand-red' : 'text-white'}`}>ES</span>
+        </div>
       </button>
 
       {/* Content */}

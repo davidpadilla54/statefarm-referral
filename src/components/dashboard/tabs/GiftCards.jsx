@@ -1,15 +1,21 @@
 import { useGiftCards } from '../../../hooks/useGiftCards'
 import { useSortable } from '../../../hooks/useSortable'
+import { useStaffRole } from '../../../hooks/useStaffRole'
 import Badge from '../../ui/Badge'
 import Button from '../../ui/Button'
 import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
+import Tooltip from '../../ui/Tooltip'
 import { useToast } from '../../ui/ToastProvider'
 import { sendEmail } from '../../../lib/resend'
 
+const DAVID_EMAIL = 'david.padilla.vaf43r@statefarm.com'
+
 export default function GiftCards() {
   const { giftCards, loading, markSent } = useGiftCards()
+  const { role } = useStaffRole()
   const toast = useToast()
+  const isAdmin = role === 'admin'
 
   async function handleMarkSent(id) {
     const gc = giftCards.find(g => g.id === id)
@@ -17,30 +23,34 @@ export default function GiftCards() {
     toast('Gift card marked as sent!', 'success')
     if (gc?.customers?.email) {
       sendEmail('gift_card_sent', {
-        customerName: gc.customers.name ?? 'there',
+        customerName:  gc.customers.name ?? 'there',
         customerEmail: gc.customers.email,
-        referredName: gc.referrals?.referred_name ?? 'your referral',
-        amount: Number(gc.amount).toFixed(0),
-        tier: gc.tier,
+        referredName:  gc.referrals?.referred_name ?? 'your referral',
+        amount:        Number(gc.amount).toFixed(0),
+        tier:          gc.tier,
+        agentEmail:    DAVID_EMAIL,
       }).catch(console.error)
     }
   }
 
   const pending = giftCards.filter(g => g.status === 'Pending')
-  const sent = giftCards.filter(g => g.status === 'Sent')
+  const sent    = giftCards.filter(g => g.status === 'Sent')
 
   const flatForSort = giftCards.map(gc => ({
     ...gc,
     _customer: gc.customers?.name ?? '',
     _referral: gc.referrals?.referred_name ?? '',
-    _date: gc.earned_at ?? '',
+    _date:     gc.earned_at ?? '',
   }))
   const { sorted: sortedGC, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_date', 'desc')
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Gift Cards</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-xl font-bold text-gray-900">Gift Cards</h2>
+          <Tooltip text="Gift cards are automatically created when a referral is marked Quoted. Only David can mark them as sent." position="right" />
+        </div>
         <div className="flex gap-3 text-sm">
           <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-medium">
             {pending.length} Pending
@@ -50,6 +60,12 @@ export default function GiftCards() {
           </span>
         </div>
       </div>
+
+      {!isAdmin && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
+          Only David Padilla can mark gift cards as sent.
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
         {loading ? (
@@ -72,7 +88,7 @@ export default function GiftCards() {
                 <SortableHeader label="Amount"      colKey="amount"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <SortableHeader label="Date Earned" colKey="_date"     activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <SortableHeader label="Status"      colKey="status"    activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                {isAdmin && <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -86,13 +102,15 @@ export default function GiftCards() {
                     {new Date(gc.earned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
                   <td className="px-4 py-3"><Badge label={gc.status} /></td>
-                  <td className="px-4 py-3">
-                    {gc.status === 'Pending' && (
-                      <Button size="sm" variant="secondary" onClick={() => handleMarkSent(gc.id)}>
-                        Mark Sent
-                      </Button>
-                    )}
-                  </td>
+                  {isAdmin && (
+                    <td className="px-4 py-3">
+                      {gc.status === 'Pending' && (
+                        <Button size="sm" variant="secondary" onClick={() => handleMarkSent(gc.id)}>
+                          Mark Sent
+                        </Button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

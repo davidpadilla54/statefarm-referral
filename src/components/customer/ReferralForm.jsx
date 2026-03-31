@@ -129,7 +129,7 @@ function PersonSlot({ index, person, onChange, errors, tr, isCollapsed, onExpand
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
-export default function ReferralForm({ customer, quotedCount, staffId, tr, lang }) {
+export default function ReferralForm({ customer, quotedCount, staffId, staffEmail, tr, lang }) {
   const navigate = useNavigate()
   const [persons, setPersons] = useState([emptyPerson()])
   const [interests, setInterests] = useState([])
@@ -195,16 +195,18 @@ export default function ReferralForm({ customer, quotedCount, staffId, tr, lang 
 
       const tier = getTierForCount(quotedCount)
 
-      // Send one email per referral to agent
+      // Send confirmation to customer + notify agent/staff
       toInsert.forEach(ref => {
         sendEmail('new_referral', {
-          referredBy: customer.name,
-          referredName: ref.referred_name,
-          referredPhone: ref.referred_phone,
-          referredEmail: ref.referred_email ?? '',
+          referredBy:       customer.name,
+          referredName:     ref.referred_name,
+          referredPhone:    ref.referred_phone,
+          referredEmail:    ref.referred_email ?? '',
           insuranceInterest: interests,
-          currentTier: tier.name,
-          tierAmount: tier.amount,
+          currentTier:      tier.name,
+          tierAmount:       tier.amount,
+          customerEmail:    customer.email ?? null,
+          staffEmail:       staffEmail ?? null,
         }).catch(console.error)
       })
 
@@ -294,7 +296,7 @@ export default function ReferralForm({ customer, quotedCount, staffId, tr, lang 
         </Button>
 
         <p className="text-xs text-gray-400 text-center pt-1">
-          Gift cards are awarded only when a referred contact is reachable and completes a quote with our office.
+          {tr.giftCardDisclaimer}
         </p>
       </form>
     </Card>

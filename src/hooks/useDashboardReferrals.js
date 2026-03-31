@@ -9,7 +9,7 @@ export function useDashboardReferrals() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('referrals')
-      .select(`*, customers(name, slug, tier), staff:assigned_to(name)`)
+      .select(`*, customers(name, slug, tier, email, created_by), staff:assigned_to(name)`)
       .order('submitted_at', { ascending: false })
     setReferrals(data ?? [])
     setLoading(false)

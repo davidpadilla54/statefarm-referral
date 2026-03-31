@@ -38,7 +38,7 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
       // Check for tier upgrade
       const { data: customer } = await supabase
         .from('customers')
-        .select('tier, name')
+        .select('tier, name, email')
         .eq('id', referral.customer_id)
         .single()
 
@@ -52,12 +52,24 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
         }).catch(console.error)
       }
 
+      // Notify agent (David)
       sendEmail('status_quoted', {
         referredName: referral.referred_name,
         referredBy: referral.customers?.name,
         tierName: tier.name,
         amount: tier.amount,
       }).catch(console.error)
+
+      // Notify the customer who submitted the referral
+      if (referral.customers?.email) {
+        sendEmail('referral_quoted_customer', {
+          customerName: referral.customers.name,
+          customerEmail: referral.customers.email,
+          referredName: referral.referred_name,
+          amount: tier.amount,
+          tierName: tier.name,
+        }).catch(console.error)
+      }
 
       toast('Gift card created!', 'success')
     }
@@ -71,6 +83,7 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
   }
 
   const rowClass = `transition-colors duration-300 ${isNew ? 'animate-highlight' : ''}`
+  const sentBy = referral.customers?.created_by ?? '—'
 
   return (
     <tr className={rowClass}>
@@ -83,7 +96,12 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
       <td className="px-4 py-3 text-sm text-gray-500">{referral.referred_phone}</td>
       <td className="px-4 py-3 text-sm text-gray-500 truncate max-w-[160px]">{referral.referred_email}</td>
       <td className="px-4 py-3 text-sm text-gray-700">{referral.customers?.name ?? '—'}</td>
-      <td className="px-4 py-3 text-sm text-gray-500">{referral.staff?.name ?? 'Unassigned'}</td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-1.5">
+          <Avatar name={sentBy} size="sm" />
+          <span className="text-sm text-gray-600">{sentBy}</span>
+        </div>
+      </td>
       <td className="px-4 py-3">
         {referral.customers?.tier && <Badge label={referral.customers.tier} type="tier" />}
       </td>

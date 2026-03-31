@@ -2,8 +2,8 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "statefarm-referral",
-      "runtimeExecutable": "/Users/davidpadilla/.local/nodejs/bin/npm",
+      "name": "dev",
+      "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
     }

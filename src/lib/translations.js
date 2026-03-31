@@ -57,6 +57,7 @@ export const t = {
     errEmail: 'Email address is required',
     errEmailInvalid: 'Enter a valid email',
     errSubmit: 'Something went wrong. Please try again.',
+    giftCardDisclaimer: 'Gift cards are awarded only when a referred contact is reachable and completes a quote with our office.',
 
     // AgentContactCard
     agentTitle: 'State Farm Insurance Agent',
@@ -89,7 +90,7 @@ export const t = {
     perReferral: '/ referido',
     quotesToNext: (n) => `${n} cotización${n !== 1 ? 'es' : ''} más para llegar a`,
     toReach: 'para llegar a',
-    tierNames: { Bronze: 'Bronze', Silver: 'Plata', Gold: 'Oro', Platinum: 'Diamante' },
+    tierNames: { Bronze: 'Bronce', Silver: 'Plata', Gold: 'Oro', Platinum: 'Diamante' },
     platinumMsg: '¡Alcanzaste el nivel Diamante — el más alto! Ganas $30 por cada referido para siempre.',
     submitted: 'enviados',
     quoted: 'cotizados',
@@ -135,6 +136,7 @@ export const t = {
     errEmail: 'El correo electrónico es requerido',
     errEmailInvalid: 'Ingresa un correo válido',
     errSubmit: 'Algo salió mal. Por favor intenta de nuevo.',
+    giftCardDisclaimer: 'Las tarjetas de regalo se otorgan únicamente cuando el contacto referido es localizable y completa una cotización en nuestra oficina.',
 
     // AgentContactCard
     agentTitle: 'Agente de Seguros State Farm',

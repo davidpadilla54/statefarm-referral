@@ -38,6 +38,8 @@ export default function ReferPage() {
   const { customer: realCustomer, loading: custLoading } = useCustomer(isDemo ? null : slug)
   const { referrals: realReferrals, loading: refLoading } = useReferrals(isDemo ? null : realCustomer?.id)
   const [giftCards, setGiftCards] = useState([])
+  const [resolvedStaffId, setResolvedStaffId] = useState(null)
+  const [resolvedStaffEmail, setResolvedStaffEmail] = useState(null)
 
   useEffect(() => {
     if (isDemo || !realCustomer?.id) return
@@ -47,6 +49,22 @@ export default function ReferPage() {
       .eq('customer_id', realCustomer.id)
       .then(({ data }) => setGiftCards(data ?? []))
   }, [isDemo, realCustomer?.id])
+
+  // Resolve assigned staff from customer.created_by (staff name)
+  useEffect(() => {
+    if (isDemo || !realCustomer?.created_by) return
+    supabase
+      .from('staff')
+      .select('id, email')
+      .eq('name', realCustomer.created_by)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setResolvedStaffId(data.id)
+          setResolvedStaffEmail(data.email)
+        }
+      })
+  }, [isDemo, realCustomer?.created_by])
 
   const customer  = isDemo ? DEMO_CUSTOMER  : realCustomer
   const referrals = isDemo ? DEMO_REFERRALS : realReferrals
@@ -113,7 +131,8 @@ export default function ReferPage() {
           <ReferralForm
             customer={customer}
             quotedCount={quotedCount}
-            staffId={staffIdParam}
+            staffId={staffIdParam ?? resolvedStaffId}
+            staffEmail={resolvedStaffEmail}
             tr={tr}
             lang={lang}
           />
