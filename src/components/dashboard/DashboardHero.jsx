@@ -1,5 +1,6 @@
 import { AlertTriangle, TrendingDown } from 'lucide-react'
 import { useDashboardStats } from '../../hooks/useDashboardStats'
+import { useStaffRole } from '../../hooks/useStaffRole'
 import Tooltip from '../ui/Tooltip'
 
 function greeting() {
@@ -27,15 +28,17 @@ function StatCard({ label, value, icon, sub, tooltip }) {
 
 export default function DashboardHero({ onNavigate }) {
   const { stats, alerts } = useDashboardStats()
+  const { name: staffName } = useStaffRole()
   const hasAlerts = alerts.customers.length > 0 || alerts.staff.length > 0
+  const firstName = staffName ? staffName.split(' ')[0] : ''
 
   return (
     <div className="mb-6 space-y-4">
       {/* Greeting */}
       <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{greeting()}, David.</h1>
-          <p className="text-sm text-gray-400 mt-0.5">David Padilla — Referral Rewards Program</p>
+          <h1 className="text-2xl font-bold text-gray-900">{greeting()}{firstName ? `, ${firstName}` : ''}.</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{staffName ?? 'David Padilla'} — Referral Rewards Program</p>
         </div>
       </div>
 
