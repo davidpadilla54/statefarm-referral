@@ -12,7 +12,7 @@ const StaffPerformance = lazy(() => import('../components/dashboard/tabs/StaffPe
 const OutreachTools   = lazy(() => import('../components/dashboard/tabs/OutreachTools'))
 const AlertSettings   = lazy(() => import('../components/dashboard/tabs/AlertSettings'))
 
-const AGENT_ONLY_TABS = new Set(['customers', 'giftcards', 'staff', 'alerts'])
+const AGENT_ONLY_TABS = new Set([])
 
 const TAB_COMPONENTS = {
   customers:    <Customers />,
@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && activeTab === null) {
-      setActiveTab(role === 'agent' ? 'customers' : 'outreach')
+      setActiveTab('customers')
     }
   }, [role, loading])
 
@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell activeTab={activeTab} onTabChange={handleTabChange}>
-      {role === 'agent' && <DashboardHero onNavigate={handleTabChange} />}
+      <DashboardHero onNavigate={handleTabChange} />
       <Suspense fallback={<TabFallback />}>
         {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['outreach']}
       </Suspense>

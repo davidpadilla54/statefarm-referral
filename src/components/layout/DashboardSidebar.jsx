@@ -2,19 +2,19 @@ import { useAuth } from '../../hooks/useAuth'
 import { useStaffRole } from '../../hooks/useStaffRole'
 
 const ALL_TABS = [
-  { id: 'customers',   label: 'Customers',         icon: '👤', agentOnly: true },
-  { id: 'referrals',   label: 'Referral Tracker',  icon: '📋' },
-  { id: 'leaderboard', label: 'Leaderboard',        icon: '🏆' },
-  { id: 'giftcards',   label: 'Gift Cards',          icon: '🎁', agentOnly: true },
-  { id: 'staff',       label: 'Staff Performance',  icon: '👥', agentOnly: true },
-  { id: 'outreach',    label: 'Outreach Tools',     icon: '📣' },
-  { id: 'alerts',      label: 'Alert Settings',     icon: '🔔', agentOnly: true },
+  { id: 'customers',   label: 'Customers',        icon: '👤' },
+  { id: 'referrals',   label: 'Referral Tracker', icon: '📋' },
+  { id: 'leaderboard', label: 'Leaderboard',       icon: '🏆' },
+  { id: 'giftcards',   label: 'Gift Cards',        icon: '🎁' },
+  { id: 'staff',       label: 'Staff Performance', icon: '👥' },
+  { id: 'outreach',    label: 'Outreach Tools',    icon: '📣' },
+  { id: 'alerts',      label: 'Alert Settings',    icon: '🔔' },
 ]
 
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {
   const { signOut, user } = useAuth()
   const { role } = useStaffRole()
-  const tabs = ALL_TABS.filter(t => !t.agentOnly || role === 'agent')
+  const tabs = ALL_TABS
 
   const nav = (
     <nav className="flex flex-col h-full">

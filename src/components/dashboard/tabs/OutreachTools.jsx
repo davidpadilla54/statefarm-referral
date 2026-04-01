@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Copy, MessageSquare, Mail, Link } from 'lucide-react'
+import { Copy, MessageSquare, Mail, Link, UserPlus, CheckCircle } from 'lucide-react'
 import Card from '../../ui/Card'
 import Button from '../../ui/Button'
 import Tooltip from '../../ui/Tooltip'
@@ -11,9 +11,14 @@ function toSlug(name) {
 }
 
 export default function OutreachTools() {
-  const [name, setName] = useState('')
-  const [staffList, setStaffList] = useState([])
+  const [name, setName]               = useState('')
+  const [phone, setPhone]             = useState('')
+  const [email, setEmail]             = useState('')
+  const [staffList, setStaffList]     = useState([])
   const [selectedStaffId, setSelectedStaffId] = useState('')
+  const [creating, setCreating]       = useState(false)
+  const [createError, setCreateError] = useState(null)
+  const [createdSlug, setCreatedSlug] = useState(null)   // set after DB insert
   const toast = useToast()
   const siteUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin
 
@@ -22,31 +27,78 @@ export default function OutreachTools() {
       .then(({ data }) => { if (data) setStaffList(data) })
   }, [])
 
-  const slug = toSlug(name)
-  const referralLink = slug && selectedStaffId
-    ? `${siteUrl}/refer?c=${slug}`
-    : ''
+  // Reset created state whenever name or staff changes
+  function handleNameChange(val) {
+    setName(val)
+    setCreatedSlug(null)
+    setCreateError(null)
+  }
+  function handleStaffChange(val) {
+    setSelectedStaffId(val)
+    setCreatedSlug(null)
+    setCreateError(null)
+  }
+
+  const slug         = toSlug(name)
+  const referralLink = createdSlug ? `${siteUrl}/refer?c=${createdSlug}` : ''
+  const canCreate    = slug && selectedStaffId && !createdSlug
+
+  async function handleCreate() {
+    setCreating(true)
+    setCreateError(null)
+    try {
+      const staffMember = staffList.find(s => s.id === selectedStaffId)
+      const { error } = await supabase.from('customers').insert({
+        name:       name.trim(),
+        slug,
+        phone:      phone.trim() || null,
+        email:      email.trim() || null,
+        created_by: staffMember?.name ?? null,
+      })
+      if (error) {
+        if (error.code === '23505') {
+          setCreateError('A customer with this name already exists. Try adding a middle initial.')
+        } else {
+          setCreateError(error.message)
+        }
+        return
+      }
+      setCreatedSlug(slug)
+      toast(`${name.trim()} added! Link is ready.`, 'success')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const firstName = name.split(' ')[0]
 
   const smsTemplate = referralLink
-    ? `Hey ${name.split(' ')[0]}! It's [Your Name] from David Padilla – State Farm 🏠\n\nYou're enrolled in our Referral Rewards Program! Know anyone who could use auto, home, or life insurance? Use your personal link to enter their info and earn a gift card when they get a quote:\n\n${referralLink}\n\nIt only takes a minute — and there's no limit to how many you can refer! Questions? Just reply! 😊`
+    ? `Hey ${firstName}! It's [Your Name] from David Padilla – State Farm 🏠\n\nYou're enrolled in our Referral Rewards Program! Know anyone who could use auto, home, or life insurance? Use your personal link to enter their info and earn a gift card when they get a quote:\n\n${referralLink}\n\nIt only takes a minute — and there's no limit to how many you can refer! Questions? Just reply! 😊`
     : ''
 
   const emailSubject = name ? `${name} — Your Referral Rewards Link` : ''
-  const emailBody = referralLink
-    ? `Hi ${name.split(' ')[0]},\n\nThank you for being a valued client of David Padilla – State Farm!\n\nYou're enrolled in our Referral Rewards Program. Use your personal link below to submit a friend or family member's info and earn a gift card when they get a quote:\n\n${referralLink}\n\nThere's no limit — refer as many people as you'd like!\n\nQuestions? Call us at 904-398-0401.\n\nBest,\nDavid Padilla\nState Farm Agent\n904-398-0401`
+  const emailBody    = referralLink
+    ? `Hi ${firstName},\n\nThank you for being a valued client of David Padilla – State Farm!\n\nYou're enrolled in our Referral Rewards Program. Use your personal link below to submit a friend or family member's info and earn a gift card when they get a quote:\n\n${referralLink}\n\nThere's no limit — refer as many people as you'd like!\n\nQuestions? Call us at 904-398-0401.\n\nBest,\nDavid Padilla\nState Farm Agent\n904-398-0401`
     : ''
 
   function copy(text, label) {
     navigator.clipboard.writeText(text).then(() => toast(`${label} copied!`, 'success'))
   }
 
-  const ready = referralLink !== ''
+  function resetForm() {
+    setName('')
+    setPhone('')
+    setEmail('')
+    setSelectedStaffId('')
+    setCreatedSlug(null)
+    setCreateError(null)
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-1">
         <h2 className="text-xl font-bold text-gray-900">Outreach Tools</h2>
-        <Tooltip text="Generate ready-to-use referral links and message templates for any customer. Select your name and enter the customer's name, then copy the SMS or email template to reach out directly from your own phone or email app." position="right" />
+        <Tooltip text="Add a customer and generate a referral link + ready-to-send templates. Select your name, fill in the customer details, then click Create Customer to register them and unlock the templates." position="right" />
       </div>
 
       {/* How to use */}
@@ -54,22 +106,24 @@ export default function OutreachTools() {
         <p className="font-semibold mb-1">How to use this tool:</p>
         <ol className="list-decimal list-inside space-y-1 text-blue-700">
           <li>Select your name below</li>
-          <li>Type the customer's name to generate their personal referral link</li>
+          <li>Enter the customer's name and contact info</li>
+          <li>Click <strong>Create Customer</strong> — this adds them to the system</li>
           <li>Copy the SMS or email template and send it from your own device</li>
         </ol>
-        <p className="mt-2 text-xs text-blue-600">Note: This generates copy-paste templates. Messages are sent from your own phone or email, not the system. For system-tracked sends, use the <strong>Send Link</strong> button in the Customers tab.</p>
+        <p className="mt-2 text-xs text-blue-600">Note: The customer must be created in the system before their referral link works. For customers already in the system, use the <strong>Send Link</strong> button in the Customers tab.</p>
       </div>
 
       <Card>
         {/* Staff selector */}
         <label className="text-sm font-medium text-gray-700 block mb-2">
           Your Name
-          <Tooltip text="Select your name so the generated link and templates are personalized correctly." />
+          <Tooltip text="Select your name so the customer is assigned to you." />
         </label>
         <select
           value={selectedStaffId}
-          onChange={e => setSelectedStaffId(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-4"
+          onChange={e => handleStaffChange(e.target.value)}
+          disabled={!!createdSlug}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-4 disabled:opacity-50 disabled:bg-gray-50"
         >
           <option value="">Select your name…</option>
           {staffList.map(s => (
@@ -77,20 +131,70 @@ export default function OutreachTools() {
           ))}
         </select>
 
-        <label className="text-sm font-medium text-gray-700 block mb-2">Customer Name</label>
+        {/* Customer Name */}
+        <label className="text-sm font-medium text-gray-700 block mb-2">Customer Name *</label>
         <input
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={e => handleNameChange(e.target.value)}
           placeholder="e.g. Sarah Johnson"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-4"
+          disabled={!!createdSlug}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-3 disabled:opacity-50 disabled:bg-gray-50"
         />
 
-        {!ready && (
-          <p className="text-sm text-gray-400 text-center py-4">Select your name and enter a customer name to generate templates.</p>
+        {/* Phone */}
+        <label className="text-sm font-medium text-gray-700 block mb-2">Phone</label>
+        <input
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+          placeholder="(904) 555-0100"
+          type="tel"
+          disabled={!!createdSlug}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-3 disabled:opacity-50 disabled:bg-gray-50"
+        />
+
+        {/* Email */}
+        <label className="text-sm font-medium text-gray-700 block mb-2">Email</label>
+        <input
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="sarah@example.com"
+          type="email"
+          disabled={!!createdSlug}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-red mb-4 disabled:opacity-50 disabled:bg-gray-50"
+        />
+
+        {/* Error */}
+        {createError && (
+          <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">
+            {createError}
+          </p>
         )}
 
-        {ready && (
-          <div className="space-y-4">
+        {/* Create button or success banner */}
+        {!createdSlug ? (
+          <Button
+            onClick={handleCreate}
+            disabled={!canCreate || creating}
+            className="w-full"
+          >
+            <UserPlus size={15} className="mr-2" />
+            {creating ? 'Creating…' : 'Create Customer & Generate Link'}
+          </Button>
+        ) : (
+          <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle size={18} />
+              <span className="text-sm font-semibold">{name} added to the system!</span>
+            </div>
+            <button onClick={resetForm} className="text-xs text-green-600 hover:text-green-800 underline font-medium">
+              Add another
+            </button>
+          </div>
+        )}
+
+        {/* Templates — shown only after customer is created */}
+        {createdSlug && (
+          <div className="space-y-4 mt-4">
             {/* Referral Link */}
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 mb-1">
