@@ -37,8 +37,8 @@ export default function DashboardHero({ onNavigate }) {
       {/* Greeting */}
       <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{greeting()}{firstName ? `, ${firstName}` : ''}.</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{staffName ?? 'David Padilla'} — Referral Rewards Program</p>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{greeting()}{firstName ? `, ${firstName}` : ''}.</h1>
+          <p className="text-sm font-medium text-gray-600 mt-1">{staffName ?? 'David Padilla'} — Referral Rewards Program</p>
         </div>
       </div>
 
