@@ -1,11 +1,20 @@
 import { useState } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 
-export default function DashboardShell({ activeTab, onTabChange, contentBg = 'bg-gray-50', children }) {
+const MONEY_PATTERN = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='8' y='42' font-size='36' fill='%2316a34a' opacity='0.07' font-family='serif' font-weight='bold'%3E%24%3C/text%3E%3C/svg%3E")`
+
+export default function DashboardShell({ activeTab, onTabChange, contentBg = 'bg-gray-50', showMoneyPattern = false, children }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  const wrapperStyle = showMoneyPattern
+    ? { backgroundImage: MONEY_PATTERN, backgroundRepeat: 'repeat', backgroundColor: '#f0fdf4' }
+    : {}
+
   return (
-    <div className={`flex min-h-screen ${contentBg} overflow-x-hidden transition-colors duration-300`}>
+    <div
+      className={`flex min-h-screen ${showMoneyPattern ? '' : contentBg} overflow-x-hidden transition-colors duration-300`}
+      style={wrapperStyle}
+    >
       <DashboardSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}

@@ -49,7 +49,7 @@ export default function DashboardPage() {
   const allowed = !AGENT_ONLY_TABS.has(activeTab) || role === 'agent'
 
   return (
-    <DashboardShell activeTab={activeTab} onTabChange={handleTabChange} contentBg={activeTab === 'customers' ? 'bg-red-50' : activeTab === 'referrals' ? 'bg-blue-50' : 'bg-gray-50'}>
+    <DashboardShell activeTab={activeTab} onTabChange={handleTabChange} contentBg={activeTab === 'customers' ? 'bg-red-50' : 'bg-gray-50'} showMoneyPattern={activeTab === 'referrals'}>
       <DashboardHero onNavigate={handleTabChange} />
       <Suspense fallback={<TabFallback />}>
         {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['customers']}
