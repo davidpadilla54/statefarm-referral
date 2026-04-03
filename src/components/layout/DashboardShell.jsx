@@ -9,7 +9,7 @@ export default function DashboardShell({ activeTab, onTabChange, contentBg = 'bg
   const wrapperStyle = showMoneyPattern
     ? { backgroundImage: MONEY_PATTERN, backgroundRepeat: 'repeat', backgroundColor: '#f0fdf4' }
     : showCustomerRed
-    ? { backgroundColor: 'rgba(204, 0, 0, 0.12)' }
+    ? { backgroundColor: 'rgba(204, 0, 0, 0.28)' }
     : {}
 
   return (
