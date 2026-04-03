@@ -4,13 +4,12 @@ import DashboardHero from '../components/dashboard/DashboardHero'
 import Skeleton from '../components/ui/Skeleton'
 import { useStaffRole } from '../hooks/useStaffRole'
 
-const Customers       = lazy(() => import('../components/dashboard/tabs/Customers'))
-const ReferralTracker = lazy(() => import('../components/dashboard/tabs/ReferralTracker'))
-const Leaderboard     = lazy(() => import('../components/dashboard/tabs/Leaderboard'))
-const GiftCards       = lazy(() => import('../components/dashboard/tabs/GiftCards'))
+const Customers        = lazy(() => import('../components/dashboard/tabs/Customers'))
+const ReferralTracker  = lazy(() => import('../components/dashboard/tabs/ReferralTracker'))
+const Leaderboard      = lazy(() => import('../components/dashboard/tabs/Leaderboard'))
+const GiftCards        = lazy(() => import('../components/dashboard/tabs/GiftCards'))
 const StaffPerformance = lazy(() => import('../components/dashboard/tabs/StaffPerformance'))
-const OutreachTools   = lazy(() => import('../components/dashboard/tabs/OutreachTools'))
-const AlertSettings   = lazy(() => import('../components/dashboard/tabs/AlertSettings'))
+const AlertSettings    = lazy(() => import('../components/dashboard/tabs/AlertSettings'))
 
 const AGENT_ONLY_TABS = new Set([])
 
@@ -20,7 +19,6 @@ const TAB_COMPONENTS = {
   leaderboard:  <Leaderboard />,
   giftcards:    <GiftCards />,
   staff:        <StaffPerformance />,
-  outreach:     <OutreachTools />,
   alerts:       <AlertSettings />,
 }
 
@@ -51,10 +49,10 @@ export default function DashboardPage() {
   const allowed = !AGENT_ONLY_TABS.has(activeTab) || role === 'agent'
 
   return (
-    <DashboardShell activeTab={activeTab} onTabChange={handleTabChange}>
+    <DashboardShell activeTab={activeTab} onTabChange={handleTabChange} contentBg={activeTab === 'customers' ? 'bg-red-50' : activeTab === 'referrals' ? 'bg-blue-50' : 'bg-gray-50'}>
       <DashboardHero onNavigate={handleTabChange} />
       <Suspense fallback={<TabFallback />}>
-        {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['outreach']}
+        {allowed ? TAB_COMPONENTS[activeTab] : TAB_COMPONENTS['customers']}
       </Suspense>
     </DashboardShell>
   )

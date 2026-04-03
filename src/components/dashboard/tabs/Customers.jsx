@@ -310,7 +310,7 @@ export default function Customers() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Customers</h2>
+        <h2 className="text-xl font-bold text-gray-900">Current Customers</h2>
         <div className="flex gap-2 flex-wrap">
           <input
             type="search"

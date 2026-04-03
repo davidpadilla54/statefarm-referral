@@ -49,7 +49,7 @@ export default function ReferralTracker() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex items-center gap-1">
-          <h2 className="text-xl font-bold text-gray-900">Referral Tracker</h2>
+          <h2 className="text-xl font-bold text-gray-900">Referrals/Prospects</h2>
           <Tooltip text="All referrals submitted by customers. 'Sent By' shows which staff member invited that customer. Status can be updated inline." position="right" />
         </div>
         <div className="flex gap-2 flex-wrap">

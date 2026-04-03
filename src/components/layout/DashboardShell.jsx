@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 
-export default function DashboardShell({ activeTab, onTabChange, children }) {
+export default function DashboardShell({ activeTab, onTabChange, contentBg = 'bg-gray-50', children }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className={`flex min-h-screen ${contentBg} overflow-x-hidden transition-colors duration-300`}>
       <DashboardSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}

@@ -2,13 +2,12 @@ import { useAuth } from '../../hooks/useAuth'
 import { useStaffRole } from '../../hooks/useStaffRole'
 
 const ALL_TABS = [
-  { id: 'customers',   label: 'Customers',        icon: '👤' },
-  { id: 'referrals',   label: 'Referral Tracker', icon: '📋' },
-  { id: 'leaderboard', label: 'Leaderboard',       icon: '🏆' },
-  { id: 'giftcards',   label: 'Gift Cards',        icon: '🎁' },
-  { id: 'staff',       label: 'Staff Performance', icon: '👥' },
-  { id: 'outreach',    label: 'Outreach Tools',    icon: '📣' },
-  { id: 'alerts',      label: 'Alert Settings',    icon: '🔔' },
+  { id: 'customers',   label: 'Current Customers',    icon: '👤' },
+  { id: 'referrals',   label: 'Referrals/Prospects',  icon: '📋' },
+  { id: 'leaderboard', label: 'Leaderboard',           icon: '🏆' },
+  { id: 'giftcards',   label: 'Gift Cards',            icon: '🎁' },
+  { id: 'staff',       label: 'Staff Performance',     icon: '👥' },
+  { id: 'alerts',      label: 'Alert Settings',        icon: '🔔' },
 ]
 
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {
