@@ -20,7 +20,7 @@ function StatCard({ label, value, icon, sub, tooltip }) {
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</p>
           {tooltip && <Tooltip text={tooltip} position="top" />}
         </div>
-        {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+        {sub && <p className="text-xs text-gray-600 mt-0.5">{sub}</p>}
       </div>
     </div>
   )
@@ -38,7 +38,7 @@ export default function DashboardHero({ onNavigate }) {
       <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{greeting()}{firstName ? `, ${firstName}` : ''}.</h1>
-          <p className="text-sm font-medium text-gray-600 mt-1">{staffName ?? 'David Padilla'} — Referral Rewards Program</p>
+          <p className="text-sm font-semibold text-gray-700 mt-1">{staffName ?? 'David Padilla'} — Referral Rewards Program</p>
         </div>
       </div>
 

@@ -110,7 +110,7 @@ export default function ReferralTracker() {
         )}
       </div>
 
-      <p className="text-xs text-gray-400">{filtered.length} referral{filtered.length !== 1 ? 's' : ''} shown</p>
+      <p className="text-xs font-medium text-gray-700">{filtered.length} referral{filtered.length !== 1 ? 's' : ''} shown</p>
 
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

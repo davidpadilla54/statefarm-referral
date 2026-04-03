@@ -428,7 +428,7 @@ export default function Customers() {
         )}
       </div>
 
-      <p className="text-xs text-gray-400">{filtered.length} customer{filtered.length !== 1 ? 's' : ''}</p>
+      <p className="text-xs font-medium text-gray-700">{filtered.length} customer{filtered.length !== 1 ? 's' : ''}</p>
 
       {/* Modals */}
       {showAdd && (
