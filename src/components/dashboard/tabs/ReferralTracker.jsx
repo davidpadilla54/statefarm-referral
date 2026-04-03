@@ -5,13 +5,27 @@ import ReferralRow from '../ReferralRow'
 import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
 import Tooltip from '../../ui/Tooltip'
+import { useToast } from '../../ui/ToastProvider'
 
 const STATUS_FILTER_OPTIONS = ['All', 'New', 'Contacted', 'Quoted', 'Won', 'Lost']
 
 export default function ReferralTracker() {
-  const { referrals, loading, newRowIds, refetch } = useDashboardReferrals()
+  const { referrals, loading, newRowIds, refetch, deleteReferral } = useDashboardReferrals()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const toast = useToast()
+
+  async function handleDeleteReferral() {
+    try {
+      await deleteReferral(confirmDelete.id)
+      toast(`Referral for ${confirmDelete.referred_name} deleted.`, 'success')
+    } catch (err) {
+      toast(err?.message ?? 'Delete failed', 'error')
+    } finally {
+      setConfirmDelete(null)
+    }
+  }
 
   const filtered = referrals.filter(r => {
     const matchSearch =
@@ -78,6 +92,7 @@ export default function ReferralTracker() {
                 <SortableHeader label="Tier"           colKey="tier"           activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <SortableHeader label="Date"           colKey="_date"          activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <SortableHeader label="Status"         colKey="status"         activeSortKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -87,6 +102,7 @@ export default function ReferralTracker() {
                   referral={r}
                   isNew={newRowIds.has(r.id)}
                   onUpdated={refetch}
+                  onDelete={() => setConfirmDelete(r)}
                 />
               ))}
             </tbody>
@@ -95,6 +111,32 @@ export default function ReferralTracker() {
       </div>
 
       <p className="text-xs text-gray-400">{filtered.length} referral{filtered.length !== 1 ? 's' : ''} shown</p>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDelete(null)} />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
+            <h3 className="text-base font-bold text-gray-900 mb-2">Delete Referral?</h3>
+            <p className="text-sm text-gray-500 mb-5">
+              This will permanently delete the referral for <strong>{confirmDelete.referred_name}</strong>. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 px-4 py-2 text-sm font-semibold border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteReferral}
+                className="flex-1 px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

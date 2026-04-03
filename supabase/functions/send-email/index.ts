@@ -6,8 +6,9 @@ import { giftCardSentHtml }           from './templates/giftCardSent.js'
 import { customerConfirmationHtml }   from './templates/customerConfirmation.js'
 import { referralQuotedCustomerHtml } from './templates/referralQuotedCustomer.js'
 
-const AGENT_EMAIL = 'davidpadilla54@gmail.com'
-const FROM_NAME   = 'David Padilla – State Farm'
+const AGENT_EMAIL    = 'davidpadilla54@gmail.com'
+const AGENT_SF_EMAIL = 'david.padilla.vaf43r@statefarm.com'
+const FROM_NAME      = 'David Padilla – State Farm'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -50,19 +51,19 @@ serve(async (req) => {
     switch (type) {
 
       case 'new_referral': {
-        const staffRecipients = [AGENT_EMAIL]
-        if (payload.staffEmail && payload.staffEmail !== AGENT_EMAIL) {
+        const staffRecipients = [AGENT_EMAIL, AGENT_SF_EMAIL]
+        if (payload.staffEmail && payload.staffEmail !== AGENT_EMAIL && payload.staffEmail !== AGENT_SF_EMAIL) {
           staffRecipients.push(payload.staffEmail)
         }
         await sendMail(staffRecipients, '📋 New Referral Submitted', newReferralHtml(payload))
         if (payload.customerEmail) {
-          await sendMail([payload.customerEmail], '✅ We received your referral!', customerConfirmationHtml(payload), [AGENT_EMAIL])
+          await sendMail([payload.customerEmail], '✅ We received your referral!', customerConfirmationHtml(payload), [AGENT_EMAIL, AGENT_SF_EMAIL])
         }
         break
       }
 
       case 'status_quoted': {
-        await sendMail([AGENT_EMAIL], '✅ Referral Quoted — Gift Card Earned', statusQuotedHtml(payload))
+        await sendMail([AGENT_EMAIL, AGENT_SF_EMAIL], '✅ Referral Quoted — Gift Card Earned', statusQuotedHtml(payload))
         break
       }
 
@@ -73,13 +74,13 @@ serve(async (req) => {
       }
 
       case 'tier_upgrade': {
-        await sendMail([AGENT_EMAIL], '🏆 Customer Tier Upgrade', tierUpgradeHtml(payload))
+        await sendMail([AGENT_EMAIL, AGENT_SF_EMAIL], '🏆 Customer Tier Upgrade', tierUpgradeHtml(payload))
         break
       }
 
       case 'gift_card_sent': {
         const to = payload.customerEmail ?? AGENT_EMAIL
-        const cc = to !== AGENT_EMAIL ? [AGENT_EMAIL] : undefined
+        const cc = to !== AGENT_EMAIL ? [AGENT_EMAIL, AGENT_SF_EMAIL] : [AGENT_SF_EMAIL]
         await sendMail([to], '🎁 Your Gift Card Has Been Sent!', giftCardSentHtml(payload), cc)
         break
       }

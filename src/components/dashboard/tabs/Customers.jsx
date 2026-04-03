@@ -264,13 +264,25 @@ function EditCustomerModal({ customer, onClose, onSave }) {
 
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function Customers() {
-  const { customers, loading, addCustomer, updateCustomer } = useCustomers()
+  const { customers, loading, addCustomer, updateCustomer, deleteCustomer } = useCustomers()
   const { name: staffName } = useStaffRole()
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState(null)
   const [smsCustomer, setSmsCustomer] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
   const [search, setSearch] = useState('')
   const toast = useToast()
+
+  async function handleDeleteCustomer() {
+    try {
+      await deleteCustomer(confirmDelete.id)
+      toast(`${confirmDelete.name} deleted.`, 'success')
+    } catch (err) {
+      toast(err?.message ?? 'Delete failed', 'error')
+    } finally {
+      setConfirmDelete(null)
+    }
+  }
 
   const filtered = customers.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -401,6 +413,12 @@ export default function Customers() {
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => setConfirmDelete(c)}
+                        className="text-sm text-red-400 hover:text-red-600 font-medium transition-colors"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -431,6 +449,32 @@ export default function Customers() {
           customer={smsCustomer}
           onClose={() => setSmsCustomer(null)}
         />
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDelete(null)} />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
+            <h3 className="text-base font-bold text-gray-900 mb-2">Delete Customer?</h3>
+            <p className="text-sm text-gray-500 mb-5">
+              This will permanently delete <strong>{confirmDelete.name}</strong> and all their referrals and gift cards. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 px-4 py-2 text-sm font-semibold border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteCustomer}
+                className="flex-1 px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

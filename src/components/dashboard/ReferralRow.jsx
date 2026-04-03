@@ -7,7 +7,7 @@ import { useToast } from '../ui/ToastProvider'
 
 const STATUSES = ['New', 'Contacted', 'Quoted', 'Won', 'Lost']
 
-export default function ReferralRow({ referral, isNew, onUpdated }) {
+export default function ReferralRow({ referral, isNew, onUpdated, onDelete }) {
   const toast = useToast()
 
   async function handleStatusChange(e) {
@@ -116,6 +116,14 @@ export default function ReferralRow({ referral, isNew, onUpdated }) {
         >
           {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+      </td>
+      <td className="px-4 py-3">
+        <button
+          onClick={onDelete}
+          className="text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
+        >
+          Delete
+        </button>
       </td>
     </tr>
   )
