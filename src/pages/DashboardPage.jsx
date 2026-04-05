@@ -10,6 +10,7 @@ const Leaderboard      = lazy(() => import('../components/dashboard/tabs/Leaderb
 const GiftCards        = lazy(() => import('../components/dashboard/tabs/GiftCards'))
 const StaffPerformance = lazy(() => import('../components/dashboard/tabs/StaffPerformance'))
 const AlertSettings    = lazy(() => import('../components/dashboard/tabs/AlertSettings'))
+const DeletedRecords   = lazy(() => import('../components/dashboard/tabs/DeletedRecords'))
 
 const AGENT_ONLY_TABS = new Set([])
 
@@ -20,6 +21,7 @@ const TAB_COMPONENTS = {
   giftcards:    <GiftCards />,
   staff:        <StaffPerformance />,
   alerts:       <AlertSettings />,
+  deleted:      <DeletedRecords />,
 }
 
 const TabFallback = () => (

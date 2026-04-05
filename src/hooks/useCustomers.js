@@ -36,8 +36,11 @@ export function useCustomers() {
     await fetch()
   }
 
-  async function deleteCustomer(id) {
-    const { error } = await supabase.from('customers').delete().eq('id', id)
+  async function deleteCustomer(id, deletedBy) {
+    const { error } = await supabase
+      .from('customers')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: deletedBy ?? 'Unknown' })
+      .eq('id', id)
     if (error) throw error
     await fetch()
   }

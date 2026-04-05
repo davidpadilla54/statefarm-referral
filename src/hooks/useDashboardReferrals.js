@@ -31,8 +31,12 @@ export function useDashboardReferrals() {
     return () => supabase.removeChannel(channel)
   }, [fetch])
 
-  async function deleteReferral(id) {
-    await supabase.from('referrals').delete().eq('id', id)
+  async function deleteReferral(id, deletedBy) {
+    const { error } = await supabase
+      .from('referrals')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: deletedBy ?? 'Unknown' })
+      .eq('id', id)
+    if (error) throw error
     fetch()
   }
 

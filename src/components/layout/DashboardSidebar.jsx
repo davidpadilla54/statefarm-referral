@@ -8,6 +8,7 @@ const ALL_TABS = [
   { id: 'giftcards',   label: 'Gift Cards',            icon: '🎁' },
   { id: 'staff',       label: 'Staff Performance',     icon: '👥' },
   { id: 'alerts',      label: 'Alert Settings',        icon: '🔔' },
+  { id: 'deleted',     label: 'Deleted',               icon: '🗑️' },
 ]
 
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {

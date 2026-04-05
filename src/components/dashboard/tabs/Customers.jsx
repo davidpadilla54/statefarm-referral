@@ -275,8 +275,8 @@ export default function Customers() {
 
   async function handleDeleteCustomer() {
     try {
-      await deleteCustomer(confirmDelete.id)
-      toast(`${confirmDelete.name} deleted.`, 'success')
+      await deleteCustomer(confirmDelete.id, staffName)
+      toast(`${confirmDelete.name} moved to Deleted.`, 'success')
     } catch (err) {
       toast(err?.message ?? 'Delete failed', 'error')
     } finally {
@@ -457,7 +457,7 @@ export default function Customers() {
           <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
             <h3 className="text-base font-bold text-gray-900 mb-2">Delete Customer?</h3>
             <p className="text-sm text-gray-500 mb-5">
-              This will permanently delete <strong>{confirmDelete.name}</strong> and all their referrals and gift cards. This cannot be undone.
+              <strong>{confirmDelete.name}</strong> will be moved to the Deleted tab. You can restore them at any time.
             </p>
             <div className="flex gap-3">
               <button
