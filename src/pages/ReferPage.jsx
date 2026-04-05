@@ -117,15 +117,16 @@ export default function ReferPage() {
           tr={tr}
         />
 
+        <TierBreakdownGrid currentTierName={loading ? null : tier.name} tr={tr} />
+
+        <HowItWorks tr={tr} />
+
         <ReferralHistoryTable
           referrals={referrals}
           giftCards={gcData}
           loading={loading}
           tr={tr}
         />
-
-        <HowItWorks tr={tr} />
-        <TierBreakdownGrid currentTierName={loading ? null : tier.name} tr={tr} />
 
         {!loading && customer && (
           <ReferralForm
