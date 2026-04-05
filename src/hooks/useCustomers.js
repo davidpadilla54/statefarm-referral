@@ -8,7 +8,7 @@ export function useCustomers() {
   const fetch = useCallback(async () => {
     const { data } = await supabase
       .from('customers')
-      .select('*')
+      .select('*, referrals(id, deleted_at)')
       .order('created_at', { ascending: false })
     setCustomers(data ?? [])
     setLoading(false)

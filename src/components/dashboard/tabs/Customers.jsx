@@ -10,6 +10,28 @@ import Input from '../../ui/Input'
 import Skeleton from '../../ui/Skeleton'
 import SortableHeader from '../../ui/SortableHeader'
 import { useToast } from '../../ui/ToastProvider'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+
+const NUDGE_BUSINESS_DAYS = 5
+
+function businessDaysSince(dateStr) {
+  const d = new Date(dateStr)
+  d.setHours(0, 0, 0, 0)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  let count = 0
+  while (d < now) {
+    d.setDate(d.getDate() + 1)
+    const day = d.getDay()
+    if (day !== 0 && day !== 6) count++
+  }
+  return count
+}
+
+function needsNudge(customer) {
+  const activeReferrals = (customer.referrals ?? []).filter(r => !r.deleted_at)
+  return activeReferrals.length === 0 && businessDaysSince(customer.created_at) >= NUDGE_BUSINESS_DAYS
+}
 
 const siteUrl = import.meta.env.VITE_PROD_URL ?? import.meta.env.VITE_SITE_URL ?? window.location.origin
 
@@ -111,6 +133,96 @@ It only takes a minute — and there's no limit to how many you can refer! Quest
             <a
               href={smsHref}
               className="flex-1 px-4 py-2.5 text-sm font-bold bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors text-center"
+              onClick={onClose}
+            >
+              📱 Open in Messages
+            </a>
+          </div>
+
+          <p className="text-xs text-gray-400 text-center mt-2">
+            Opens your native SMS app with this message pre-filled
+          </p>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+// ── Nudge Modal ─────────────────────────────────────────────────────────────
+function NudgeModal({ customer, onClose }) {
+  const fullLink = referralLink(customer.slug)
+  const staffFirstName = customer.created_by ? customer.created_by.split(' ')[0] : 'the team'
+  const customerFirstName = customer.name.split(' ')[0]
+
+  const defaultScript =
+`Hey ${customerFirstName}! It's ${staffFirstName} from David Padilla – State Farm 🏠
+
+Just a friendly reminder — your Referral Rewards link is still active! 🎁
+
+If you know anyone who could use auto, home, or life insurance, just use your personal link to enter their info. You'll earn a gift card once they complete a quote — it only takes a minute!
+
+${fullLink}
+
+No rush at all, just wanted to make sure you didn't miss out! Questions? Just reply 😊`
+
+  const [message, setMessage] = useState(defaultScript)
+  const toast = useToast()
+
+  const phone = (customer.phone ?? '').replace(/\D/g, '')
+  const smsHref = phone
+    ? `sms:+1${phone}?body=${encodeURIComponent(message)}`
+    : `sms:?body=${encodeURIComponent(message)}`
+
+  function copyMessage() {
+    navigator.clipboard.writeText(message).then(() => toast('Message copied!', 'success'))
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg">
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white text-sm font-bold shrink-0">🔔</div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Send Friendly Nudge</h2>
+                <p className="text-xs text-gray-400">{customer.name} · No referrals yet</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          </div>
+
+          <div className="mb-3">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">To</label>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-mono">
+              {customer.phone || <span className="text-gray-400 italic">No phone on file</span>}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Message</label>
+              <span className="text-xs text-gray-400">Editable before sending</span>
+            </div>
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              rows={9}
+              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none text-gray-700 leading-relaxed"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={copyMessage}
+              className="flex-1 px-4 py-2.5 text-sm font-semibold border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Copy Message
+            </button>
+            <a
+              href={smsHref}
+              className="flex-1 px-4 py-2.5 text-sm font-bold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-center"
               onClick={onClose}
             >
               📱 Open in Messages
@@ -269,8 +381,10 @@ export default function Customers() {
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState(null)
   const [smsCustomer, setSmsCustomer] = useState(null)
+  const [nudgeCustomer, setNudgeCustomer] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [search, setSearch] = useState('')
+  const [nudgeOpen, setNudgeOpen] = useState(true)
   const toast = useToast()
 
   async function handleDeleteCustomer() {
@@ -290,11 +404,12 @@ export default function Customers() {
     c.slug.includes(search.toLowerCase())
   )
 
-  const flatForSort = filtered.map(c => ({
-    ...c,
-    _joined: c.created_at ?? '',
-  }))
-  const { sorted: sortedCustomers, sortKey, sortDir, handleSort } = useSortable(flatForSort, '_joined', 'desc')
+  const nudgeList  = filtered.filter(needsNudge)
+  const activeList = filtered.filter(c => !needsNudge(c))
+
+  const toFlat = list => list.map(c => ({ ...c, _joined: c.created_at ?? '' }))
+  const { sorted: sortedCustomers, sortKey, sortDir, handleSort } = useSortable(toFlat(activeList), '_joined', 'desc')
+  const { sorted: sortedNudge } = useSortable(toFlat(nudgeList), '_joined', 'asc')
 
   function copyLink(slug) {
     navigator.clipboard.writeText(referralLink(slug))
@@ -407,6 +522,15 @@ export default function Customers() {
                       >
                         📱 Send Link
                       </button>
+                      {needsNudge(c) && (
+                        <button
+                          onClick={() => setNudgeCustomer(c)}
+                          className="text-xs font-semibold px-2.5 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors whitespace-nowrap"
+                          title="Send a friendly reminder"
+                        >
+                          🔔 Nudge
+                        </button>
+                      )}
                       <button
                         onClick={() => setEditing(c)}
                         className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
@@ -428,7 +552,98 @@ export default function Customers() {
         )}
       </div>
 
-      <p className="text-xs font-medium text-gray-700">{filtered.length} customer{filtered.length !== 1 ? 's' : ''}</p>
+      <p className="text-xs font-medium text-gray-700">{activeList.length} customer{activeList.length !== 1 ? 's' : ''}</p>
+
+      {/* Needs Nudge collapsible */}
+      <div className="rounded-xl border border-amber-200 overflow-hidden">
+        <button
+          onClick={() => setNudgeOpen(o => !o)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-amber-50 hover:bg-amber-100 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            {nudgeOpen ? <ChevronDown size={16} className="text-amber-600" /> : <ChevronRight size={16} className="text-amber-600" />}
+            <span className="text-sm font-bold text-amber-800">🔔 Needs a Nudge</span>
+            <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-semibold">{nudgeList.length}</span>
+            <span className="text-xs text-amber-600 font-normal">· invited {NUDGE_BUSINESS_DAYS}+ business days ago, no referrals yet</span>
+          </div>
+          <span className="text-xs text-amber-600">{nudgeOpen ? 'Collapse' : 'Expand'}</span>
+        </button>
+
+        {nudgeOpen && (
+          <div className="overflow-x-auto bg-white">
+            {nudgeList.length === 0 ? (
+              <p className="text-center py-8 text-gray-400 text-sm">Everyone's active — no nudges needed right now 🎉</p>
+            ) : (
+              <table className="w-full min-w-[760px]">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-amber-50 text-left">
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Added By</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Days Since Invited</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {sortedNudge.map(c => (
+                    <tr key={c.id} className="hover:bg-amber-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar name={c.name} size="sm" />
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-semibold text-gray-900">{c.name}</p>
+                              <span className="text-base" title="Needs a nudge">🔔</span>
+                            </div>
+                            <p className="text-xs text-gray-400 font-mono">{c.slug}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-600">{c.phone || '—'}</p>
+                        <p className="text-xs text-gray-400 truncate max-w-[160px]">{c.email || '—'}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.created_by ? (
+                          <div className="flex items-center gap-1.5">
+                            <Avatar name={c.created_by} size="xs" />
+                            <span className="text-xs text-gray-600">{c.created_by.split(' ')[0]}</span>
+                          </div>
+                        ) : <span className="text-xs text-gray-400">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-semibold text-amber-700">{businessDaysSince(c.created_at)} business days</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setNudgeCustomer(c)}
+                            className="text-xs font-semibold px-2.5 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors whitespace-nowrap"
+                          >
+                            🔔 Nudge
+                          </button>
+                          <button
+                            onClick={() => setSmsCustomer(c)}
+                            className="text-xs font-semibold px-2.5 py-1.5 bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors whitespace-nowrap"
+                          >
+                            📱 Send Link
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete(c)}
+                            className="text-sm text-red-400 hover:text-red-600 font-medium transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modals */}
       {showAdd && (
@@ -445,10 +660,10 @@ export default function Customers() {
         />
       )}
       {smsCustomer && (
-        <SmsModal
-          customer={smsCustomer}
-          onClose={() => setSmsCustomer(null)}
-        />
+        <SmsModal customer={smsCustomer} onClose={() => setSmsCustomer(null)} />
+      )}
+      {nudgeCustomer && (
+        <NudgeModal customer={nudgeCustomer} onClose={() => setNudgeCustomer(null)} />
       )}
 
       {confirmDelete && (
