@@ -109,6 +109,8 @@ export default function ReferPage() {
       />
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <TierBreakdownGrid currentTierName={loading ? null : tier.name} tr={tr} />
+
         <TierProgressCard
           customer={customer}
           referrals={referrals}
@@ -116,8 +118,6 @@ export default function ReferPage() {
           loading={loading}
           tr={tr}
         />
-
-        <TierBreakdownGrid currentTierName={loading ? null : tier.name} tr={tr} />
 
         <HowItWorks tr={tr} />
 
