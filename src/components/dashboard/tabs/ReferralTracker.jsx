@@ -9,7 +9,23 @@ import Tooltip from '../../ui/Tooltip'
 import { useToast } from '../../ui/ToastProvider'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 
-const STATUS_FILTER_OPTIONS = ['All', 'New', 'Contacted', 'Lost']
+const STATUS_FILTER_OPTIONS = ['All', 'New', 'Attempted Contact', 'Lost']
+
+const CALL_ASAP_DAYS = 3
+
+function businessDaysSince(dateStr) {
+  const d = new Date(dateStr)
+  d.setHours(0, 0, 0, 0)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  let count = 0
+  while (d < now) {
+    d.setDate(d.getDate() + 1)
+    const day = d.getDay()
+    if (day !== 0 && day !== 6) count++
+  }
+  return count
+}
 
 export default function ReferralTracker() {
   const { referrals, loading, newRowIds, refetch, deleteReferral } = useDashboardReferrals()
@@ -18,6 +34,7 @@ export default function ReferralTracker() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [closedOpen, setClosedOpen] = useState(false)
+  const [callAsapOpen, setCallAsapOpen] = useState(true)
   const toast = useToast()
 
   async function handleDeleteReferral() {
@@ -33,13 +50,18 @@ export default function ReferralTracker() {
 
   const CLOSED_STATUSES = ['Quoted', 'Won']
 
+  const isCallAsap = r => r.status === 'New' && businessDaysSince(r.submitted_at) >= CALL_ASAP_DAYS
+
   const matchSearch = r =>
     r.referred_name?.toLowerCase().includes(search.toLowerCase()) ||
     r.customers?.name?.toLowerCase().includes(search.toLowerCase()) ||
     r.referred_email?.toLowerCase().includes(search.toLowerCase())
 
+  const callAsapReferrals = referrals.filter(r => isCallAsap(r) && matchSearch(r))
+
   const activeReferrals = referrals.filter(r =>
     !CLOSED_STATUSES.includes(r.status) &&
+    !isCallAsap(r) &&
     matchSearch(r) &&
     (statusFilter === 'All' || r.status === statusFilter)
   )
@@ -57,6 +79,7 @@ export default function ReferralTracker() {
 
   const { sorted: sortedActive, sortKey, sortDir, handleSort } = useSortable(toFlat(activeReferrals), '_date', 'desc')
   const { sorted: sortedClosed } = useSortable(toFlat(closedReferrals), '_date', 'desc')
+  const { sorted: sortedCallAsap } = useSortable(toFlat(callAsapReferrals), '_date', 'asc')
 
   const tableHeaders = (
     <tr className="border-b border-gray-100 bg-gray-50 text-left">
@@ -77,7 +100,7 @@ export default function ReferralTracker() {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex items-center gap-1">
           <h2 className="text-xl font-bold text-gray-900">Referrals/Prospects</h2>
-          <Tooltip text="Active referrals (New, Contacted, Lost). Quoted and Won deals are collapsed below." position="right" />
+          <Tooltip text="Active referrals (New, Attempted Contact, Lost). Quoted and Won deals are collapsed below." position="right" />
         </div>
         <div className="flex gap-2 flex-wrap">
           <input
@@ -96,6 +119,48 @@ export default function ReferralTracker() {
           </select>
         </div>
       </div>
+
+      {/* Please Call ASAP section */}
+      {callAsapReferrals.length > 0 && (
+        <div className="rounded-xl border border-red-300 overflow-hidden">
+          <button
+            onClick={() => setCallAsapOpen(o => !o)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-red-50 hover:bg-red-100 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              {callAsapOpen ? <ChevronDown size={16} className="text-red-600" /> : <ChevronRight size={16} className="text-red-600" />}
+              <span className="text-sm font-bold text-red-800">🚨 Please Call ASAP</span>
+              <span className="text-xs bg-red-200 text-red-800 px-2 py-0.5 rounded-full font-semibold">{callAsapReferrals.length}</span>
+              <span className="text-xs text-red-600 font-normal">· still New after {CALL_ASAP_DAYS}+ business days</span>
+            </div>
+            <span className="text-xs text-red-600">{callAsapOpen ? 'Collapse' : 'Expand'}</span>
+          </button>
+
+          {callAsapOpen && (
+            <div className="overflow-x-auto bg-white">
+              <table className="w-full min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-red-50 text-left">
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Referral Name</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Phone</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Referred By</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Sent By</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Days Waiting</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {sortedCallAsap.map(r => (
+                    <ReferralRow key={r.id} referral={r} isNew={false} onUpdated={refetch} onDelete={() => setConfirmDelete(r)} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Active referrals table */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">

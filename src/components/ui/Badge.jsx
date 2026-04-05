@@ -1,6 +1,6 @@
 const STATUS_STYLES = {
   New:       'bg-gray-100 text-gray-700',
-  Contacted: 'bg-blue-100 text-blue-700',
+  'Attempted Contact': 'bg-blue-100 text-blue-700',
   Quoted:    'bg-green-100 text-green-700',
   Won:       'bg-emerald-100 text-emerald-700',
   Lost:      'bg-red-100 text-red-700',

@@ -5,7 +5,7 @@ import Avatar from '../ui/Avatar'
 import Badge from '../ui/Badge'
 import { useToast } from '../ui/ToastProvider'
 
-const STATUSES = ['New', 'Contacted', 'Quoted', 'Won', 'Lost']
+const STATUSES = ['New', 'Attempted Contact', 'Quoted', 'Won', 'Lost']
 
 export default function ReferralRow({ referral, isNew, onUpdated, onDelete }) {
   const toast = useToast()
