@@ -3,6 +3,9 @@ import DashboardShell from '../components/layout/DashboardShell'
 import DashboardHero from '../components/dashboard/DashboardHero'
 import Skeleton from '../components/ui/Skeleton'
 import { useStaffRole } from '../hooks/useStaffRole'
+import { useAuth } from '../hooks/useAuth'
+
+const DAVID_EMAIL = 'david.padilla.vaf43r@statefarm.com'
 
 const Customers        = lazy(() => import('../components/dashboard/tabs/Customers'))
 const ReferralTracker  = lazy(() => import('../components/dashboard/tabs/ReferralTracker'))
@@ -35,6 +38,8 @@ const TabFallback = () => (
 
 export default function DashboardPage() {
   const { role, loading } = useStaffRole()
+  const { user } = useAuth()
+  const isAgent = user?.email === DAVID_EMAIL
   const [activeTab, setActiveTab] = useState(null)
 
   useEffect(() => {
@@ -44,13 +49,13 @@ export default function DashboardPage() {
   }, [role, loading])
 
   function handleTabChange(tab) {
-    if (AGENT_ONLY_TABS.has(tab) && role !== 'agent') return
+    if (AGENT_ONLY_TABS.has(tab) && !isAgent) return
     setActiveTab(tab)
   }
 
   if (loading || !activeTab) return <TabFallback />
 
-  const allowed = !AGENT_ONLY_TABS.has(activeTab) || role === 'agent'
+  const allowed = !AGENT_ONLY_TABS.has(activeTab) || isAgent
 
   return (
     <DashboardShell activeTab={activeTab} onTabChange={handleTabChange} contentBg={activeTab === 'customers' ? 'bg-gray-50' : 'bg-gray-50'} showCustomerRed={activeTab === 'customers'} showMoneyPattern={activeTab === 'referrals'}>

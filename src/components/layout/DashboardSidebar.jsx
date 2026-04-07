@@ -15,7 +15,8 @@ const ALL_TABS = [
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {
   const { signOut, user } = useAuth()
   const { role } = useStaffRole()
-  const tabs = ALL_TABS.filter(t => !t.agentOnly || role === 'agent')
+  const isAgent = user?.email === 'david.padilla.vaf43r@statefarm.com'
+  const tabs = ALL_TABS.filter(t => !t.agentOnly || isAgent)
 
   const nav = (
     <nav className="flex flex-col h-full">
