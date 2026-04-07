@@ -20,6 +20,12 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
+      const { data: staffData } = await supabase
+        .from('staff').select('name').eq('email', email).single()
+      await supabase.from('login_activity').insert({
+        staff_email: email,
+        staff_name: staffData?.name ?? email,
+      })
       navigate('/dashboard')
     }
   }

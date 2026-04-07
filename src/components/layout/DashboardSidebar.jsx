@@ -9,12 +9,13 @@ const ALL_TABS = [
   { id: 'staff',       label: 'Staff Performance',     icon: '👥' },
   { id: 'alerts',      label: 'Alert Settings',        icon: '🔔' },
   { id: 'deleted',     label: 'Deleted',               icon: '🗑️' },
+  { id: 'logins',      label: 'Login Activity',        icon: '🔐', agentOnly: true },
 ]
 
 export default function DashboardSidebar({ activeTab, onTabChange, mobileOpen, onMobileClose }) {
   const { signOut, user } = useAuth()
   const { role } = useStaffRole()
-  const tabs = ALL_TABS
+  const tabs = ALL_TABS.filter(t => !t.agentOnly || role === 'agent')
 
   const nav = (
     <nav className="flex flex-col h-full">
