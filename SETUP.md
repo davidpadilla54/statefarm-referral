@@ -125,6 +125,27 @@ insert into staff (name, email) values
   ('David Padilla', 'david.padilla.vaf43r@statefarm.com');
 ```
 
+### Login Activity Table (added for Login Activity tab)
+
+Run this separately (or append to the block above):
+
+```sql
+CREATE TABLE IF NOT EXISTS login_activity (
+  id             uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  staff_email    text        NOT NULL,
+  staff_name     text,
+  logged_in_at   timestamptz DEFAULT now()
+);
+
+ALTER TABLE login_activity ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "insert_own_login" ON login_activity
+  FOR INSERT WITH CHECK (auth.jwt() ->> 'email' = staff_email);
+
+CREATE POLICY "read_all_logins" ON login_activity
+  FOR SELECT USING (auth.role() = 'authenticated');
+```
+
 ## Step 4: Enable Realtime
 
 Supabase → Database → Replication → toggle ON for the `referrals` table.
