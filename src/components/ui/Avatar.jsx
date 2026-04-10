@@ -1,13 +1,25 @@
-const COLORS = [
-  'bg-red-500', 'bg-blue-500', 'bg-emerald-500',
-  'bg-violet-500', 'bg-orange-500', 'bg-teal-500',
-  'bg-pink-500', 'bg-indigo-500',
+// Named color assignments — keyed on first name (lowercase)
+const STAFF_COLORS = {
+  david:   'bg-red-600',
+  shay:    'bg-pink-500',
+  stanley: 'bg-green-600',
+  javett:  'bg-purple-600',
+  santos:  'bg-blue-500',
+  yohance: 'bg-red-900',
+  brooke:  'bg-yellow-400',
+}
+
+const FALLBACK_COLORS = [
+  'bg-emerald-500', 'bg-teal-500', 'bg-indigo-500',
+  'bg-orange-500',  'bg-cyan-500', 'bg-violet-500',
 ]
 
 function pickColor(name = '') {
+  const first = name.trim().split(/\s+/)[0]?.toLowerCase() ?? ''
+  if (STAFF_COLORS[first]) return STAFF_COLORS[first]
   let n = 0
   for (const c of name) n += c.charCodeAt(0)
-  return COLORS[n % COLORS.length]
+  return FALLBACK_COLORS[n % FALLBACK_COLORS.length]
 }
 
 function initials(name = '') {

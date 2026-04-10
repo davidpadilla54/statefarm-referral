@@ -9,6 +9,7 @@ export function useCustomers() {
     const { data } = await supabase
       .from('customers')
       .select('*, referrals(id, deleted_at)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
     setCustomers(data ?? [])
     setLoading(false)

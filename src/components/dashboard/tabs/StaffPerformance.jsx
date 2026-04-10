@@ -13,16 +13,20 @@ export default function StaffPerformance() {
 
   useEffect(() => {
     async function load() {
-      const { data: staff }    = await supabase.from('staff').select('id, name, email, active')
-      const { data: referrals } = await supabase.from('referrals').select('assigned_to, status')
+      const { data: staff }     = await supabase.from('staff').select('id, name, email, active').eq('active', true)
+      const { data: referrals } = await supabase.from('referrals').select('assigned_to, status, customers(created_by)').is('deleted_at', null)
 
       if (!staff) { setLoading(false); return }
 
       const rows = staff.map(s => {
-        const mine    = (referrals ?? []).filter(r => r.assigned_to === s.id)
-        const total   = mine.length
-        const quoted  = mine.filter(r => r.status === 'Quoted' || r.status === 'Won').length
-        const won     = mine.filter(r => r.status === 'Won').length
+        const mine    = (referrals ?? []).filter(r =>
+          r.assigned_to === s.id || r.customers?.created_by === s.name
+        )
+        // Deduplicate in case both match the same referral
+        const unique  = [...new Map(mine.map(r => [r.id ?? Math.random(), r])).values()]
+        const total   = unique.length
+        const quoted  = unique.filter(r => r.status === 'Quoted' || r.status === 'Won').length
+        const won     = unique.filter(r => r.status === 'Won').length
         const convRate = total  > 0 ? Math.round((quoted / total) * 100) : 0
         const winRate  = quoted > 0 ? Math.round((won / quoted) * 100) : 0
         return { ...s, total, quoted, won, convRate, winRate }

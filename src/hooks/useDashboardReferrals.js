@@ -10,6 +10,7 @@ export function useDashboardReferrals() {
     const { data } = await supabase
       .from('referrals')
       .select(`*, customers(name, slug, tier, email, created_by), staff:assigned_to(name)`)
+      .is('deleted_at', null)
       .order('submitted_at', { ascending: false })
     setReferrals(data ?? [])
     setLoading(false)
