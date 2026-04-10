@@ -474,7 +474,7 @@ export default function Customers() {
                     <tr key={c.id} className="hover:bg-amber-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={c.name} size="sm" />
+                          <Avatar name={c.name} colorName={c.created_by} size="sm" />
                           <div>
                             <div className="flex items-center gap-1.5">
                               <p className="text-sm font-semibold text-gray-900">{c.name}</p>
@@ -567,7 +567,7 @@ export default function Customers() {
                 <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <Avatar name={c.name} size="sm" />
+                      <Avatar name={c.name} colorName={c.created_by} size="sm" />
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{c.name}</p>
                         <p className="text-xs text-gray-400 font-mono">{c.slug}</p>

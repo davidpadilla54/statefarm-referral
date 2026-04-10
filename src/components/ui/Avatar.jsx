@@ -29,10 +29,10 @@ function initials(name = '') {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-export default function Avatar({ name = '', size = 'md' }) {
+export default function Avatar({ name = '', colorName, size = 'md' }) {
   const sz = size === 'sm' ? 'w-7 h-7 text-xs' : size === 'lg' ? 'w-11 h-11 text-base' : 'w-9 h-9 text-sm'
   return (
-    <div className={`${pickColor(name)} ${sz} rounded-full flex items-center justify-center text-white font-bold shrink-0 select-none`}>
+    <div className={`${pickColor(colorName ?? name)} ${sz} rounded-full flex items-center justify-center text-white font-bold shrink-0 select-none`}>
       {initials(name)}
     </div>
   )

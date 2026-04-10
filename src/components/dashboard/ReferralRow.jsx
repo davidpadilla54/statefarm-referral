@@ -89,7 +89,7 @@ export default function ReferralRow({ referral, isNew, onUpdated, onDelete }) {
     <tr className={rowClass}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <Avatar name={referral.referred_name} size="sm" />
+          <Avatar name={referral.referred_name} colorName={sentBy} size="sm" />
           <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{referral.referred_name}</span>
         </div>
       </td>
