@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { useLeaderboard } from '../../../hooks/useLeaderboard'
 import { useSortable } from '../../../hooks/useSortable'
 import { supabase } from '../../../lib/supabase'
@@ -9,10 +10,32 @@ import SortableHeader from '../../ui/SortableHeader'
 import Tooltip from '../../ui/Tooltip'
 
 const MEDALS = ['🥇', '🥈', '🥉']
+const TOP_N = 10
+
+function LeaderRow({ row, rank }) {
+  return (
+    <tr className="hover:bg-gray-50 transition-colors">
+      <td className="px-4 py-3 text-lg text-center">
+        {rank < 3 ? MEDALS[rank] : <span className="text-sm text-gray-500 font-medium">#{rank + 1}</span>}
+      </td>
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <Avatar name={row.name} size="sm" />
+          <span className="text-sm font-semibold text-gray-900">{row.name}</span>
+        </div>
+      </td>
+      <td className="px-4 py-3"><Badge label={row.tier} type="tier" /></td>
+      <td className="px-4 py-3 text-sm text-gray-600">{row.submitted}</td>
+      <td className="px-4 py-3 text-sm text-gray-600">{row.quoted}</td>
+      <td className="px-4 py-3 text-sm font-bold text-green-700">${row.earned}</td>
+    </tr>
+  )
+}
 
 export default function Leaderboard() {
   const { rows, loading } = useLeaderboard()
   const { sorted, sortKey, sortDir, handleSort } = useSortable(rows, 'submitted', 'desc')
+  const [restOpen, setRestOpen] = useState(false)
 
   // Staff leaderboard: customers invited per staff member
   const [staffRows, setStaffRows] = useState([])
@@ -75,25 +98,41 @@ export default function Leaderboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sorted.map((row, i) => (
-                  <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-lg text-center">
-                      {i < 3 ? MEDALS[i] : <span className="text-sm text-gray-500 font-medium">#{i + 1}</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar name={row.name} size="sm" />
-                        <span className="text-sm font-semibold text-gray-900">{row.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3"><Badge label={row.tier} type="tier" /></td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{row.submitted}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{row.quoted}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-green-700">${row.earned}</td>
-                  </tr>
+                {sorted.slice(0, TOP_N).map((row, i) => (
+                  <LeaderRow key={row.id} row={row} rank={i} />
                 ))}
               </tbody>
             </table>
+
+            {/* Collapsed remainder */}
+            {sorted.length > TOP_N && (
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => setRestOpen(o => !o)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    {restOpen
+                      ? <ChevronDown size={15} className="text-gray-400" />
+                      : <ChevronRight size={15} className="text-gray-400" />}
+                    <span className="font-medium text-gray-600">
+                      {restOpen ? 'Hide' : `Show ${sorted.length - TOP_N} more`}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-400">#{TOP_N + 1}–#{sorted.length}</span>
+                </button>
+
+                {restOpen && (
+                  <table className="w-full min-w-[540px]">
+                    <tbody className="divide-y divide-gray-100">
+                      {sorted.slice(TOP_N).map((row, i) => (
+                        <LeaderRow key={row.id} row={row} rank={TOP_N + i} />
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
           )}
         </div>
       </div>
