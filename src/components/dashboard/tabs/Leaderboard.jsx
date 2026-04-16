@@ -86,6 +86,7 @@ export default function Leaderboard() {
               <p className="font-medium">No customers yet</p>
             </div>
           ) : (
+            <>
             <table className="w-full min-w-[540px]">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50 text-left">
@@ -104,7 +105,6 @@ export default function Leaderboard() {
               </tbody>
             </table>
 
-            {/* Collapsed remainder */}
             {sorted.length > TOP_N && (
               <div className="border-t border-gray-100">
                 <button
@@ -133,6 +133,7 @@ export default function Leaderboard() {
                 )}
               </div>
             )}
+            </>
           )}
         </div>
       </div>
