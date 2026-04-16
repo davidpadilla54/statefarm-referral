@@ -46,5 +46,14 @@ export function useCustomers() {
     await fetch()
   }
 
-  return { customers, loading, addCustomer, updateCustomer, deleteCustomer, refetch: fetch }
+  async function markNudged(id) {
+    const { error } = await supabase
+      .from('customers')
+      .update({ last_nudged_at: new Date().toISOString() })
+      .eq('id', id)
+    if (error) throw error
+    await fetch()
+  }
+
+  return { customers, loading, addCustomer, updateCustomer, deleteCustomer, markNudged, refetch: fetch }
 }

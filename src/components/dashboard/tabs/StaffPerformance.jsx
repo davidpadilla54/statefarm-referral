@@ -15,8 +15,13 @@ export default function StaffPerformance() {
     async function load() {
       const { data: staff }     = await supabase.from('staff').select('id, name, email, active').eq('active', true)
       const { data: referrals } = await supabase.from('referrals').select('assigned_to, status, customers(created_by)').is('deleted_at', null)
+      const { data: loginData } = await supabase.rpc('get_staff_last_login')
 
       if (!staff) { setLoading(false); return }
+
+      // Build email → last_sign_in_at lookup
+      const loginMap = {}
+      ;(loginData ?? []).forEach(l => { loginMap[l.email] = l.last_sign_in_at })
 
       const rows = staff.map(s => {
         const mine    = (referrals ?? []).filter(r =>
@@ -29,7 +34,8 @@ export default function StaffPerformance() {
         const won     = unique.filter(r => r.status === 'Won').length
         const convRate = total  > 0 ? Math.round((quoted / total) * 100) : 0
         const winRate  = quoted > 0 ? Math.round((won / quoted) * 100) : 0
-        return { ...s, total, quoted, won, convRate, winRate }
+        const lastLogin = loginMap[s.email] ?? null
+        return { ...s, total, quoted, won, convRate, winRate, lastLogin }
       })
 
       setStats(rows)
@@ -91,6 +97,12 @@ export default function StaffPerformance() {
                   )}
                 </div>
                 <p className="text-xs text-gray-400">{s.email}</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Last login:{' '}
+                  {s.lastLogin
+                    ? new Date(s.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : <span className="text-amber-500 font-medium">Never</span>}
+                </p>
               </div>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                 {s.active ? 'Active' : 'Inactive'}
@@ -131,12 +143,13 @@ export default function StaffPerformance() {
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50 text-left">
               {[
-                ['name',     'Name'],
-                ['total',    'Assigned'],
-                ['quoted',   'Quoted'],
-                ['won',      'Won'],
-                ['convRate', 'Conv. Rate %'],
-                ['winRate',  'Win Rate %'],
+                ['name',      'Name'],
+                ['total',     'Assigned'],
+                ['quoted',    'Quoted'],
+                ['won',       'Won'],
+                ['convRate',  'Conv. Rate %'],
+                ['winRate',   'Win Rate %'],
+                ['lastLogin', 'Last Login'],
               ].map(([key, label]) => (
                 <th
                   key={key}
@@ -163,6 +176,11 @@ export default function StaffPerformance() {
                 </td>
                 <td className="px-4 py-3">
                   <span className={`text-sm font-semibold ${rateText(s.winRate)}`}>{s.winRate}%</span>
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                  {s.lastLogin
+                    ? new Date(s.lastLogin).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : <span className="text-amber-500 font-medium">Never</span>}
                 </td>
               </tr>
             ))}

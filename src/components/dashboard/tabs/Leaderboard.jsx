@@ -20,8 +20,8 @@ export default function Leaderboard() {
 
   useEffect(() => {
     async function loadStaff() {
-      const { data: customers } = await supabase.from('customers').select('created_by')
-      const { data: referrals } = await supabase.from('referrals').select('customer_id, status, assigned_to')
+      const { data: customers } = await supabase.from('customers').select('created_by').is('deleted_at', null)
+      const { data: referrals } = await supabase.from('referrals').select('customer_id, status, assigned_to').is('deleted_at', null)
       const { data: staff }     = await supabase.from('staff').select('id, name').eq('active', true)
 
       if (!staff) { setStaffLoading(false); return }

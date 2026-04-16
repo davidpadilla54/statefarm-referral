@@ -30,7 +30,11 @@ function businessDaysSince(dateStr) {
 
 function needsNudge(customer) {
   const activeReferrals = (customer.referrals ?? []).filter(r => !r.deleted_at)
-  return activeReferrals.length === 0 && businessDaysSince(customer.created_at) >= NUDGE_BUSINESS_DAYS
+  if (activeReferrals.length > 0) return false
+  if (businessDaysSince(customer.created_at) < NUDGE_BUSINESS_DAYS) return false
+  // If they were nudged recently (within last 5 business days), drop them back to regular list
+  if (customer.last_nudged_at && businessDaysSince(customer.last_nudged_at) < NUDGE_BUSINESS_DAYS) return false
+  return true
 }
 
 const siteUrl = import.meta.env.VITE_PROD_URL ?? import.meta.env.VITE_SITE_URL ?? window.location.origin
@@ -149,7 +153,7 @@ It only takes a minute — and there's no limit to how many you can refer! Quest
 }
 
 // ── Nudge Modal ─────────────────────────────────────────────────────────────
-function NudgeModal({ customer, onClose }) {
+function NudgeModal({ customer, onClose, onNudged }) {
   const fullLink = referralLink(customer.slug)
   const staffFirstName = customer.created_by ? customer.created_by.split(' ')[0] : 'the team'
   const customerFirstName = customer.name.split(' ')[0]
@@ -174,7 +178,10 @@ No rush at all, just wanted to make sure you didn't miss out! Questions? Just re
     : `sms:?body=${encodeURIComponent(message)}`
 
   function copyMessage() {
-    navigator.clipboard.writeText(message).then(() => toast('Message copied!', 'success'))
+    navigator.clipboard.writeText(message).then(() => {
+      toast('Message copied!', 'success')
+      onNudged?.()
+    })
   }
 
   return (
@@ -223,7 +230,7 @@ No rush at all, just wanted to make sure you didn't miss out! Questions? Just re
             <a
               href={smsHref}
               className="flex-1 px-4 py-2.5 text-sm font-bold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-center"
-              onClick={onClose}
+              onClick={() => { onNudged?.(); onClose() }}
             >
               📱 Open in Messages
             </a>
@@ -376,7 +383,7 @@ function EditCustomerModal({ customer, onClose, onSave }) {
 
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function Customers() {
-  const { customers, loading, addCustomer, updateCustomer, deleteCustomer } = useCustomers()
+  const { customers, loading, addCustomer, updateCustomer, deleteCustomer, markNudged } = useCustomers()
   const { name: staffName } = useStaffRole()
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -500,7 +507,7 @@ export default function Customers() {
                         <span className="text-sm font-semibold text-amber-700">{businessDaysSince(c.created_at)} business days</span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <button
                             onClick={() => setNudgeCustomer(c)}
                             className="text-xs font-semibold px-2.5 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors whitespace-nowrap"
@@ -508,10 +515,23 @@ export default function Customers() {
                             🔔 Nudge
                           </button>
                           <button
+                            onClick={() => markNudged(c.id)}
+                            className="text-xs font-semibold px-2.5 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
+                            title="Mark as nudged — moves customer back to regular list"
+                          >
+                            ✓ Sent
+                          </button>
+                          <button
                             onClick={() => setSmsCustomer(c)}
                             className="text-xs font-semibold px-2.5 py-1.5 bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors whitespace-nowrap"
                           >
                             📱 Send Link
+                          </button>
+                          <button
+                            onClick={() => setEditing(c)}
+                            className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors"
+                          >
+                            Edit
                           </button>
                           <button
                             onClick={() => setConfirmDelete(c)}
@@ -665,7 +685,11 @@ export default function Customers() {
         <SmsModal customer={smsCustomer} onClose={() => setSmsCustomer(null)} />
       )}
       {nudgeCustomer && (
-        <NudgeModal customer={nudgeCustomer} onClose={() => setNudgeCustomer(null)} />
+        <NudgeModal
+          customer={nudgeCustomer}
+          onClose={() => setNudgeCustomer(null)}
+          onNudged={() => markNudged(nudgeCustomer.id)}
+        />
       )}
 
       {confirmDelete && (

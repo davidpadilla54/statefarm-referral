@@ -8,10 +8,14 @@ export function useLeaderboard() {
 
   useEffect(() => {
     async function load() {
-      const { data: customers } = await supabase.from('customers').select('id, name, tier')
+      const { data: customers } = await supabase
+        .from('customers')
+        .select('id, name, tier')
+        .is('deleted_at', null)
       const { data: referrals } = await supabase
         .from('referrals')
         .select('customer_id, status')
+        .is('deleted_at', null)
 
       if (!customers) { setLoading(false); return }
 

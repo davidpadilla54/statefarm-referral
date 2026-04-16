@@ -16,8 +16,9 @@ export default function ReferralRow({ referral, isNew, onUpdated, onDelete }) {
 
     await supabase.from('referrals').update({ status: newStatus }).eq('id', referral.id)
 
-    // Auto-create gift card when moved to Quoted
-    if (newStatus === 'Quoted' && oldStatus !== 'Quoted') {
+    // Auto-create gift card when moved to Quoted or Won (but not if already in a closed state)
+    const closedStatuses = ['Quoted', 'Won']
+    if (closedStatuses.includes(newStatus) && !closedStatuses.includes(oldStatus)) {
       const { data: refCount } = await supabase
         .from('referrals')
         .select('id', { count: 'exact' })
@@ -71,7 +72,7 @@ export default function ReferralRow({ referral, isNew, onUpdated, onDelete }) {
         }).catch(console.error)
       }
 
-      toast('Gift card created!', 'success')
+      toast(`Gift card created! (${newStatus})`, 'success')
     }
 
     onUpdated?.()

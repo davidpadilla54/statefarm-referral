@@ -21,5 +21,17 @@ export function useGiftCards() {
     fetch()
   }
 
-  return { giftCards, loading, markSent, refetch: fetch }
+  async function deleteGiftCard(id) {
+    const { error } = await supabase.from('gift_cards').delete().eq('id', id)
+    if (error) throw error
+    fetch()
+  }
+
+  async function editGiftCard(id, updates) {
+    const { error } = await supabase.from('gift_cards').update(updates).eq('id', id)
+    if (error) throw error
+    fetch()
+  }
+
+  return { giftCards, loading, markSent, deleteGiftCard, editGiftCard, refetch: fetch }
 }
